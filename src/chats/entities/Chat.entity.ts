@@ -16,11 +16,11 @@ export class Chat {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ type: 'string', format: 'datetime' })
+  @ApiProperty({ type: 'string', format: 'ISO 8061' })
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @ApiProperty({ type: 'string', format: 'datetime' })
+  @ApiProperty({ type: 'string', format: 'ISO 8061' })
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 

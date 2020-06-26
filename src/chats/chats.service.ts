@@ -4,7 +4,7 @@ import { Chat } from './entities/Chat.entity';
 import { CreateChatDto } from './dto/CreateChat.dto';
 import { EditChatDto } from './dto/EditChat.dto';
 import { ErrorGenerator } from '../common/classes/ErrorGenerator.class';
-import { PaginatedChats } from './dto/PaginatedChats.dto';
+import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
 
 @Injectable()
 export class ChatsService {
@@ -18,10 +18,7 @@ export class ChatsService {
     return chat;
   }
 
-  async updateChat(
-    chatId: number | string,
-    editDto: EditChatDto,
-  ): Promise<Chat> {
+  async editChat(chatId: number | string, editDto: EditChatDto): Promise<Chat> {
     const chat = await this.findChatOrFail(chatId);
 
     this.chatRepo.merge(chat, editDto);
@@ -34,10 +31,10 @@ export class ChatsService {
     return this.findChatOrFail(chatId);
   }
 
-  async getAllChats(): Promise<PaginatedChats> {
+  async getAllChats(): Promise<PaginatedChatsDto> {
     const [chats, totalCount] = await this.chatRepo.findAndCount();
 
-    return new PaginatedChats(chats, totalCount);
+    return new PaginatedChatsDto(chats, totalCount);
   }
 
   async findChatOrFail(chatId: string | number): Promise<Chat> {

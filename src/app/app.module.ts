@@ -3,10 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { configModuleOptions } from '../config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatsModule } from '../chats/chats.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     ChatsModule,
+    UsersModule,
     TypeOrmModule.forRoot(),
     ConfigModule.forRoot(configModuleOptions),
   ],

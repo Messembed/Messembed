@@ -14,7 +14,7 @@ import { CreateChatDto } from './dto/CreateChat.dto';
 import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { ChatPathDto } from './dto/ChatPath.dto';
 import { EditChatDto } from './dto/EditChat.dto';
-import { PaginatedChats } from './dto/PaginatedChats.dto';
+import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
 
 @Controller('chats')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -34,7 +34,7 @@ export class ChatsController {
     @Param() { chatId }: ChatPathDto,
     @Body() editDto: EditChatDto,
   ): Promise<Chat> {
-    return this.chatsService.updateChat(chatId, editDto);
+    return this.chatsService.editChat(chatId, editDto);
   }
 
   @Get(':chatId')
@@ -44,8 +44,8 @@ export class ChatsController {
   }
 
   @Get()
-  @ApiOkResponse({ type: () => PaginatedChats })
-  async getAllChats(): Promise<PaginatedChats> {
+  @ApiOkResponse({ type: () => PaginatedChatsDto })
+  async getAllChats(): Promise<PaginatedChatsDto> {
     return this.chatsService.getAllChats();
   }
 }
