@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional, IsString, Length, IsObject } from 'class-validator';
 
 export class EditChatDto {
   @ApiPropertyOptional()
@@ -7,4 +7,9 @@ export class EditChatDto {
   @Length(1, 100)
   @IsOptional()
   title?: string;
+
+  @ApiPropertyOptional()
+  @IsObject()
+  @IsOptional()
+  additionalMetadata?: Record<string, any> | null;
 }
