@@ -6,7 +6,6 @@ export function setupSwagger(app: INestApplication): void {
     .setTitle('Labado Messenger')
     .setVersion('1.0')
     .addServer('http://localhost:3000', 'Local development server')
-    .addTag('cats')
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
