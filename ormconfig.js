@@ -21,7 +21,8 @@ const ormConfig = {
   migrations: ["dist/migrations/*.js"],
   cli: {
     migrationsDir: "src/migrations"
-  }
+  },
+  logging: process.env.NODE_ENV === 'development'
 };
 
 module.exports = ormConfig;

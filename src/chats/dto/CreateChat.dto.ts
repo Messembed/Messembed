@@ -10,7 +10,7 @@ export class CreateChatDto {
   @ApiPropertyOptional()
   @IsObject()
   @IsOptional()
-  additionalMetadata?: Record<string, any> | null;
+  externalMetadata?: Record<string, any> | null;
 
   @ApiProperty()
   @IsInt()
