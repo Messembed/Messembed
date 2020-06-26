@@ -3,6 +3,7 @@ import { AppModule } from './app/app.module';
 import { setupSwagger } from './lib/setup-swagger';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
+import { initializeTransactionalContext } from 'typeorm-transactional-cls-hooked';
 
 const logger = new Logger('bootstrap');
 
@@ -10,6 +11,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   setupSwagger(app);
+
+  initializeTransactionalContext();
 
   const configServer = app.get(ConfigService);
 
