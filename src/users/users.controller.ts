@@ -7,6 +7,7 @@ import {
   Put,
   ClassSerializerInterceptor,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/User.entity';
@@ -15,6 +16,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserPathDto } from './dto/UserPath.dto';
 import { EditUserDto } from './dto/EditUser.dto';
 import { PaginatedUsersDto } from './dto/PaginatedUsers.dto';
+import { ExternalServiceAuthGuard } from '../auth/guards/ExternalServiceAuthGuard.guard';
 
 @Controller('users')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -23,6 +25,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @UseGuards(ExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => User })
   async createUser(@Body() createDto: CreateUserDto): Promise<User> {
     return this.usersService.createUser(createDto);
@@ -35,6 +38,7 @@ export class UsersController {
   }
 
   @Put(':userId')
+  @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => User })
   async editUser(
     @Param() { userId }: UserPathDto,
@@ -44,6 +48,7 @@ export class UsersController {
   }
 
   @Get()
+  @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => PaginatedUsersDto })
   async findUsers(): Promise<PaginatedUsersDto> {
     return this.usersService.findAllUsers();

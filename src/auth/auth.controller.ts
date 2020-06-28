@@ -9,7 +9,7 @@ import {
 import { ApiTags, ApiCreatedResponse, ApiBasicAuth } from '@nestjs/swagger';
 import { AccessTokenDto } from './dto/AccessToken.dto';
 import { AuthService } from './auth.service';
-import { ExternalServiceGuard } from './guards/ExternalServiceGuard.guard';
+import { ExternalServiceAuthGuard } from './guards/ExternalServiceAuthGuard.guard';
 import { UserPathDto } from '../users/dto/UserPath.dto';
 
 @Controller()
@@ -19,7 +19,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('users/:userId/createAccessToken')
-  @UseGuards(ExternalServiceGuard)
+  @UseGuards(ExternalServiceAuthGuard)
   @ApiBasicAuth()
   @ApiCreatedResponse({ type: () => AccessTokenDto })
   async getAccessTokenForUser(

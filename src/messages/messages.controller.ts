@@ -7,6 +7,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateMessageDto } from './dtos/CreateMessage.dto';
 import { Message } from './entities/Message.entity';
@@ -15,6 +16,7 @@ import { ChatPathDto } from '../chats/dto/ChatPath.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetMessagesFiltersDto } from './dtos/GetMessagesFilters.dto';
 import { PaginatedMessagesDto } from './dtos/PaginatedMessages.dto';
+import { JwtOrExternalServiceAuthGuard } from '../auth/guards/JwtOrExternalServiceAuthGuard.guard';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -23,6 +25,7 @@ export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
   @Post('chats/:chatId/messages')
+  @UseGuards(JwtOrExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => Message })
   async createMessage(
     @Param() { chatId }: ChatPathDto,
@@ -36,6 +39,7 @@ export class MessagesController {
   }
 
   @Get('chats/:chatId/messages')
+  @UseGuards(JwtOrExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => PaginatedMessagesDto, isArray: true })
   async getMessages(
     @Param() { chatId }: ChatPathDto,
