@@ -8,9 +8,12 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../users/entities/User.entity';
+import { Message } from '../../messages/entities/Message.entity';
 
 @Entity({
   name: 'chats',
@@ -52,6 +55,10 @@ export class Chat {
   @Column({ type: 'jsonb', nullable: true })
   externalMetadata?: Record<string, unknown> | null;
 
+  @ApiPropertyOptional()
+  @Column({ type: 'integer', nullable: true })
+  lastMessageId: number;
+
   @ApiPropertyOptional({ type: () => User })
   @ManyToOne(() => User)
   @JoinColumn({ name: 'initiatorId' })
@@ -61,6 +68,17 @@ export class Chat {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'companionId' })
   companion: User;
+
+  @OneToMany(
+    () => Message,
+    message => message.chat,
+  )
+  messages: Message[];
+
+  @ApiPropertyOptional({ type: () => Message })
+  @OneToOne(() => Message)
+  @JoinColumn({ name: 'lastMessageId' })
+  lastMessage: Message;
 
   constructor(data: DeepPartial<Chat>) {
     Object.assign(this, data);

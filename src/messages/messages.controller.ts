@@ -12,11 +12,12 @@ import { CreateMessageDto } from './dtos/CreateMessage.dto';
 import { Message } from './entities/Message.entity';
 import { MessagesService } from './messages.service';
 import { ChatPathDto } from '../chats/dto/ChatPath.dto';
-import { ApiCreatedResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetMessagesFiltersDto } from './dtos/GetMessagesFilters.dto';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
+@ApiTags('Messages')
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 

@@ -8,7 +8,7 @@ export class ErrorGenerator {
     code: ErrorCode,
     additional: Record<string, unknown> = {},
   ): HttpException {
-    const statusCode = errors[code];
+    const statusCode = errors[code] || 500;
 
     return new HttpException(
       {

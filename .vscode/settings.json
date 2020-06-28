@@ -3,6 +3,7 @@
   "editor.formatOnType": true,
   "editor.formatOnSave": true,
   "cSpell.words": [
+    "dtos",
     "jsonb"
   ]
 }

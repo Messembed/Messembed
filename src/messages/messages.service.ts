@@ -5,15 +5,25 @@ import { Message } from './entities/Message.entity';
 import { GetMessagesFiltersDto } from './dtos/GetMessagesFilters.dto';
 import _ from 'lodash';
 import { MoreThan, LessThan } from 'typeorm';
+import { ChatsRepository } from '../chats/repositories/Chats.repository';
+import { Transactional } from 'typeorm-transactional-cls-hooked';
 
 @Injectable()
 export class MessagesService {
-  constructor(private readonly messagesRepo: MessagesRepository) {}
+  constructor(
+    private readonly messagesRepo: MessagesRepository,
+    private readonly chatsRepo: ChatsRepository,
+  ) {}
 
+  @Transactional()
   async createMessage(options: CreateMessageOptions): Promise<Message> {
     const msg = new Message(options);
 
     await this.messagesRepo.save(msg);
+
+    await this.chatsRepo.update(options.chatId, {
+      lastMessageId: msg.id,
+    });
 
     return msg;
   }
