@@ -8,6 +8,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 
 @Entity({
   name: 'users',
@@ -36,6 +37,11 @@ export class User {
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   @Column({ type: 'jsonb' })
   externalMetadata?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  @Exclude()
+  @Column({ type: 'jsonb' })
+  privateExternalMetadata?: Record<string, unknown> | null;
 
   constructor(fields: DeepPartial<User>) {
     Object.assign(this, fields);

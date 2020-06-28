@@ -6,4 +6,9 @@ export class EditUserDto {
   @IsObject()
   @IsOptional()
   externalMetadata?: Record<string, unknown>;
+
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  @IsObject()
+  @IsOptional()
+  privateExternalMetadata?: Record<string, unknown>;
 }

@@ -12,6 +12,11 @@ export class CreateChatDto {
   @IsOptional()
   externalMetadata?: Record<string, any> | null;
 
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  @IsObject()
+  @IsOptional()
+  privateExternalMetadata?: Record<string, unknown>;
+
   @ApiProperty()
   @IsInt()
   firstCompanionId: number;

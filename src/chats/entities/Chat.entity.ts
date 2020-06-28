@@ -14,6 +14,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { User } from '../../users/entities/User.entity';
 import { Message } from '../../messages/entities/Message.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity({
   name: 'chats',
@@ -54,6 +55,11 @@ export class Chat {
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   @Column({ type: 'jsonb', nullable: true })
   externalMetadata?: Record<string, unknown> | null;
+
+  @ApiPropertyOptional({ type: 'object', additionalProperties: true })
+  @Exclude()
+  @Column({ type: 'jsonb' })
+  privateExternalMetadata?: Record<string, unknown> | null;
 
   @ApiPropertyOptional()
   @Column({ type: 'integer', nullable: true })
