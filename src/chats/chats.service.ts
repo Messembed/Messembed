@@ -48,7 +48,7 @@ export class ChatsService {
     const chats = await this.chatsRepo
       .createQueryBuilder('chats')
       .leftJoinAndSelect('chats.lastMessage', 'lastMessage')
-      .where([{ initiatorId: user.id }, { companionId: user.id }])
+      .where([{ firstCompanionId: user.id }, { secondCompanionId: user.id }])
       .orderBy('COALESCE(lastMessage.createdAt, chats.createdAt)', 'DESC')
       .getMany();
 

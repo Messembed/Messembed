@@ -14,9 +14,9 @@ export class CreateChatDto {
 
   @ApiProperty()
   @IsInt()
-  initiatorId: number;
+  firstCompanionId: number;
 
   @ApiProperty()
   @IsInt()
-  companionId: number;
+  secondCompanionId: number;
 }

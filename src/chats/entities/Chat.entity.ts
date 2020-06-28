@@ -45,11 +45,11 @@ export class Chat {
 
   @ApiProperty()
   @Column({ type: 'integer', nullable: false })
-  initiatorId: number;
+  firstCompanionId: number;
 
   @ApiProperty()
   @Column({ type: 'integer', nullable: false })
-  companionId: number;
+  secondCompanionId: number;
 
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   @Column({ type: 'jsonb', nullable: true })
@@ -61,13 +61,13 @@ export class Chat {
 
   @ApiPropertyOptional({ type: () => User })
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'initiatorId' })
-  initiator: User;
+  @JoinColumn({ name: 'firstCompanionId' })
+  firstCompanion: User;
 
   @ApiPropertyOptional({ type: () => User })
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'companionId' })
-  companion: User;
+  @JoinColumn({ name: 'secondCompanionId' })
+  secondCompanion: User;
 
   @OneToMany(
     () => Message,
