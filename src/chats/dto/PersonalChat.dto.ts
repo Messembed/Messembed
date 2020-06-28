@@ -40,11 +40,11 @@ export class PersonalChatDto {
   @ApiProperty()
   read: boolean;
 
-  static createFromChat(chat: Chat, userId: number): PersonalChatDto;
-  static createFromChat(chats: Chat[], userId: number): PersonalChatDto[];
+  static createFromChat(chat: Chat, userId: string): PersonalChatDto;
+  static createFromChat(chats: Chat[], userId: string): PersonalChatDto[];
   static createFromChat(
     chats: Chat | Chat[],
-    userId: number,
+    userId: string,
   ): PersonalChatDto | PersonalChatDto[] {
     if (_.isArray(chats)) {
       return chats.map(chat => this._createFromChat(chat, userId));
@@ -53,7 +53,7 @@ export class PersonalChatDto {
     return this._createFromChat(chats, userId);
   }
 
-  private static _createFromChat(chat: Chat, userId: number): PersonalChatDto {
+  private static _createFromChat(chat: Chat, userId: string): PersonalChatDto {
     const plainChat: any = classToPlain(chat);
 
     return new PersonalChatDto({

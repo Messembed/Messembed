@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, Length, IsInt, IsObject, IsOptional } from 'class-validator';
+import { IsString, Length, IsObject, IsOptional } from 'class-validator';
 
 export class CreateChatDto {
   @ApiProperty()
@@ -18,10 +18,10 @@ export class CreateChatDto {
   privateExternalMetadata?: Record<string, unknown>;
 
   @ApiProperty()
-  @IsInt()
-  firstCompanionId: number;
+  @IsString()
+  firstCompanionId: string;
 
   @ApiProperty()
-  @IsInt()
-  secondCompanionId: number;
+  @IsString()
+  secondCompanionId: string;
 }

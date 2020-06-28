@@ -17,7 +17,7 @@ export class UsersService {
     return user;
   }
 
-  async editUser(userId: number | string, editDto: EditUserDto): Promise<User> {
+  async editUser(userId: string, editDto: EditUserDto): Promise<User> {
     const user = await this.usersRepo.findOneOrFailHttp(userId);
 
     this.usersRepo.merge(user, editDto);
@@ -26,7 +26,7 @@ export class UsersService {
     return user;
   }
 
-  async getUser(userId: number | string): Promise<User> {
+  async getUser(userId: string): Promise<User> {
     return this.usersRepo.findOneOrFailHttp(userId);
   }
 

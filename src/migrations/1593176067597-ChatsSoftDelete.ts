@@ -19,7 +19,6 @@ export class ChatsSoftDelete1593176067597 implements MigrationInterface {
     await queryRunner.createIndex(
       'chats',
       new TableIndex({
-        name: 'IX_chats_deletedAt',
         columnNames: ['deletedAt'],
       }),
     );

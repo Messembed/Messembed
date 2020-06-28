@@ -12,12 +12,12 @@ export class ChatMembersColumnsAndMetadata1593193796301
     await queryRunner.addColumns('chats', [
       new TableColumn({
         name: 'initiatorId',
-        type: 'integer',
+        type: 'varchar(128)',
         isNullable: false,
       }),
       new TableColumn({
         name: 'companionId',
-        type: 'integer',
+        type: 'varchar(128)',
         isNullable: false,
       }),
       new TableColumn({
@@ -29,24 +29,20 @@ export class ChatMembersColumnsAndMetadata1593193796301
 
     await queryRunner.createIndices('chats', [
       new TableIndex({
-        name: 'IX_chats_initiatorId',
         columnNames: ['initiatorId'],
       }),
       new TableIndex({
-        name: 'IX_chats_companionId',
         columnNames: ['companionId'],
       }),
     ]);
 
     await queryRunner.createForeignKeys('chats', [
       new TableForeignKey({
-        name: 'FK_chats_initiatorId',
         columnNames: ['initiatorId'],
         referencedTableName: 'users',
         referencedColumnNames: ['id'],
       }),
       new TableForeignKey({
-        name: 'FK_chats_companionId',
         columnNames: ['companionId'],
         referencedTableName: 'users',
         referencedColumnNames: ['id'],

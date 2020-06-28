@@ -41,9 +41,9 @@ export class ChatsService {
     return new PaginatedChatsDto(chats, totalCount);
   }
 
-  async getPersonalChats(externalUserId: string): Promise<PersonalChatDto[]> {
+  async getPersonalChats(userId: string): Promise<PersonalChatDto[]> {
     const user = await this.usersRepo.findOneOrFailHttp({
-      externalId: externalUserId,
+      id: userId,
     });
 
     const chats = await this.chatsRepo

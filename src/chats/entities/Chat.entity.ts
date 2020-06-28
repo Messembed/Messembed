@@ -45,12 +45,12 @@ export class Chat {
   active: boolean;
 
   @ApiProperty()
-  @Column({ type: 'integer', nullable: false })
-  firstCompanionId: number;
+  @Column({ type: 'varchar', length: 128, nullable: false })
+  firstCompanionId: string;
 
   @ApiProperty()
-  @Column({ type: 'integer', nullable: false })
-  secondCompanionId: number;
+  @Column({ type: 'varchar', length: 128, nullable: false })
+  secondCompanionId: string;
 
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   @Column({ type: 'jsonb', nullable: true })

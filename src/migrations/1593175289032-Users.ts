@@ -4,28 +4,12 @@ export class Users1593175289032 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const table = new Table({
       name: 'users',
-      indices: [
-        {
-          name: 'IX_users_deletedAt',
-          columnNames: ['deletedAt'],
-        },
-        {
-          name: 'IX_users_createdAt',
-          columnNames: ['createdAt'],
-        },
-        {
-          name: 'UQ_users_externalId_wo_deleted',
-          columnNames: ['externalId'],
-          isUnique: true,
-          where: '"deletedAt" IS NULL',
-        },
-      ],
+      indices: [{ columnNames: ['deletedAt'] }, { columnNames: ['createdAt'] }],
       columns: [
         {
           name: 'id',
-          type: 'integer',
+          type: 'varchar(128)',
           isPrimary: true,
-          isGenerated: true,
           isNullable: false,
         },
         {
@@ -44,11 +28,6 @@ export class Users1593175289032 implements MigrationInterface {
           name: 'deletedAt',
           type: 'timestamptz',
           isNullable: true,
-        },
-        {
-          name: 'externalId',
-          type: 'varchar',
-          isNullable: false,
         },
         {
           name: 'externalMetadata',

@@ -5,7 +5,7 @@ export class CreateUserDto {
   @ApiProperty()
   @IsString()
   @Length(1)
-  externalId: string;
+  id: string;
 
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   @IsObject()

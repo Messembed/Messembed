@@ -31,7 +31,7 @@ export class MessagesController {
     return this.messagesService.createMessage({
       ...createDto,
       chatId,
-      userId: 1,
+      userId: '1',
     });
   }
 

@@ -12,10 +12,8 @@ export class AuthService {
     private readonly usersRepo: UsersRepository,
   ) {}
 
-  async createAccessTokenByExternalId(
-    externalId: string,
-  ): Promise<AccessTokenDto> {
-    const user = await this.usersRepo.findOneOrFailHttp({ externalId });
+  async createAccessTokenByUserId(userId: string): Promise<AccessTokenDto> {
+    const user = await this.usersRepo.findOneOrFailHttp({ id: userId });
 
     return this.createAccessToken(user);
   }
@@ -23,7 +21,6 @@ export class AuthService {
   async createAccessToken(user: User): Promise<AccessTokenDto> {
     const payload: JwtAuthTokenPayload = {
       sub: user.id,
-      externalId: user.externalId,
     };
 
     return new AccessTokenDto({

@@ -6,31 +6,25 @@ export class Messages1593208185294 implements MigrationInterface {
       name: 'messages',
       indices: [
         {
-          name: 'IX_messages_deletedAt',
           columnNames: ['deletedAt'],
         },
         {
-          name: 'IX_messages_chatId',
           columnNames: ['chatId'],
         },
         {
-          name: 'IX_messages_userId',
           columnNames: ['userId'],
         },
         {
-          name: 'IX_messages_read',
           columnNames: ['read'],
         },
       ],
       foreignKeys: [
         {
-          name: 'FK_messages_chatId',
           columnNames: ['chatId'],
           referencedTableName: 'chats',
           referencedColumnNames: ['id'],
         },
         {
-          name: 'FK_messages_userId',
           columnNames: ['userId'],
           referencedTableName: 'users',
           referencedColumnNames: ['id'],
@@ -73,7 +67,7 @@ export class Messages1593208185294 implements MigrationInterface {
         },
         {
           name: 'userId',
-          type: 'integer',
+          type: 'varchar(128)',
           isNullable: false,
         },
         {

@@ -1,4 +1,3 @@
 export interface JwtAuthTokenPayload {
-  sub: number;
-  externalId: string;
+  sub: string;
 }

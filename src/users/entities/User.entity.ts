@@ -1,11 +1,11 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
   DeepPartial,
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
@@ -15,8 +15,8 @@ import { Exclude } from 'class-transformer';
 })
 export class User {
   @ApiProperty()
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({ type: 'varchar', length: 128 })
+  id: string;
 
   @ApiProperty({ type: 'string', format: 'ISO 8061' })
   @CreateDateColumn({ type: 'timestamptz', default: 'NOW()' })
@@ -29,10 +29,6 @@ export class User {
   @ApiProperty({ type: 'string', format: 'ISO 8061' })
   @DeleteDateColumn({ type: 'timestamptz' })
   deletedAt?: Date | null;
-
-  @ApiProperty()
-  @Column({ type: 'varchar' })
-  externalId: string;
 
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   @Column({ type: 'jsonb' })

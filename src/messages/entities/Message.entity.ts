@@ -43,8 +43,8 @@ export class Message {
   chatId: number;
 
   @ApiProperty()
-  @Column({ type: 'integer' })
-  userId: number;
+  @Column({ type: 'varchar', length: 128 })
+  userId: string;
 
   @ApiProperty()
   @Column({ type: 'text' })

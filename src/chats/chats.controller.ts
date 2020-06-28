@@ -16,6 +16,7 @@ import { ChatPathDto } from './dto/ChatPath.dto';
 import { EditChatDto } from './dto/EditChat.dto';
 import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
 import { PersonalChatDto } from './dto/PersonalChat.dto';
+import { UserPathDto } from '../users/dto/UserPath.dto';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,11 +51,11 @@ export class ChatsController {
     return this.chatsService.getAllChats();
   }
 
-  @Get('users/:externalUserId/personalChats')
+  @Get('users/:userId/personalChats')
   @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
-  async getMyChats(
-    @Param('externalUserId') externalUserId: string,
+  async getPersonalChats(
+    @Param() { userId }: UserPathDto,
   ): Promise<PersonalChatDto[]> {
-    return this.chatsService.getPersonalChats(externalUserId);
+    return this.chatsService.getPersonalChats(userId);
   }
 }

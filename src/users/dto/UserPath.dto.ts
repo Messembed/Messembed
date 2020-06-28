@@ -1,6 +1,10 @@
-import { ResourcePathIdParam } from '../../common/decorators/resource-path-id-param.decorator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsString } from 'class-validator';
 
 export class UserPathDto {
-  @ResourcePathIdParam({ description: 'ID пользователя' })
-  userId: number;
+  @ApiProperty({ description: 'ID пользователя' })
+  @Type(() => String)
+  @IsString()
+  userId: string;
 }
