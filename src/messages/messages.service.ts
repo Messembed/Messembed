@@ -7,6 +7,7 @@ import _ from 'lodash';
 import { MoreThan, LessThan } from 'typeorm';
 import { ChatsRepository } from '../chats/repositories/Chats.repository';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
+import { PaginatedMessagesDto } from './dtos/PaginatedMessages.dto';
 
 @Injectable()
 export class MessagesService {
@@ -26,6 +27,18 @@ export class MessagesService {
     });
 
     return msg;
+  }
+
+  async getPaginatedMessages(
+    chatId: number,
+    filters?: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesDto> {
+    const messages = await this.getMessages(chatId, filters);
+
+    return new PaginatedMessagesDto({
+      ...filters,
+      messages,
+    });
   }
 
   async getMessages(

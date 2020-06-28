@@ -14,6 +14,7 @@ import { MessagesService } from './messages.service';
 import { ChatPathDto } from '../chats/dto/ChatPath.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetMessagesFiltersDto } from './dtos/GetMessagesFilters.dto';
+import { PaginatedMessagesDto } from './dtos/PaginatedMessages.dto';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -35,11 +36,11 @@ export class MessagesController {
   }
 
   @Get('chats/:chatId/messages')
-  @ApiOkResponse({ type: () => Message, isArray: true })
+  @ApiOkResponse({ type: () => PaginatedMessagesDto, isArray: true })
   async getMessages(
     @Param() { chatId }: ChatPathDto,
     @Query() filters: GetMessagesFiltersDto,
-  ): Promise<Message[]> {
-    return this.messagesService.getMessages(chatId, filters);
+  ): Promise<PaginatedMessagesDto> {
+    return this.messagesService.getPaginatedMessages(chatId, filters);
   }
 }
