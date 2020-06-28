@@ -7,8 +7,8 @@ import { ChatsRepository } from '../chats/repositories/Chats.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([MessagesRepository, ChatsRepository])],
-  providers: [MessagesService, MessagesRepository],
+  providers: [MessagesService],
   controllers: [MessagesController],
-  exports: [MessagesService, MessagesRepository],
+  exports: [MessagesService],
 })
 export class MessagesModule {}

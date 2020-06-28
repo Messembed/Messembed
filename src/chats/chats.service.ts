@@ -5,6 +5,7 @@ import { CreateChatDto } from './dto/CreateChat.dto';
 import { EditChatDto } from './dto/EditChat.dto';
 import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
 import { UsersRepository } from '../users/repositories/Users.repository';
+import { PersonalChatDto } from './dto/PersonalChat.dto';
 
 @Injectable()
 export class ChatsService {
@@ -40,7 +41,7 @@ export class ChatsService {
     return new PaginatedChatsDto(chats, totalCount);
   }
 
-  async getPersonalChats(externalUserId: string): Promise<Chat[]> {
+  async getPersonalChats(externalUserId: string): Promise<PersonalChatDto[]> {
     const user = await this.usersRepo.findOneOrFailHttp({
       externalId: externalUserId,
     });
@@ -48,10 +49,14 @@ export class ChatsService {
     const chats = await this.chatsRepo
       .createQueryBuilder('chats')
       .leftJoinAndSelect('chats.lastMessage', 'lastMessage')
+      .leftJoinAndSelect('chats.firstCompanion', 'firstCompanion')
+      .leftJoinAndSelect('chats.secondCompanion', 'secondCompanion')
       .where([{ firstCompanionId: user.id }, { secondCompanionId: user.id }])
       .orderBy('COALESCE(lastMessage.createdAt, chats.createdAt)', 'DESC')
       .getMany();
 
-    return chats;
+    const personalChats = PersonalChatDto.createFromChat(chats, user.id);
+
+    return personalChats;
   }
 }

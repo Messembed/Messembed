@@ -15,6 +15,7 @@ import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { ChatPathDto } from './dto/ChatPath.dto';
 import { EditChatDto } from './dto/EditChat.dto';
 import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
+import { PersonalChatDto } from './dto/PersonalChat.dto';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -49,11 +50,11 @@ export class ChatsController {
     return this.chatsService.getAllChats();
   }
 
-  @Get('users/:externalUserId/chats')
-  @ApiOkResponse({ type: () => Chat, isArray: true })
+  @Get('users/:externalUserId/personalChats')
+  @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
   async getMyChats(
     @Param('externalUserId') externalUserId: string,
-  ): Promise<Chat[]> {
+  ): Promise<PersonalChatDto[]> {
     return this.chatsService.getPersonalChats(externalUserId);
   }
 }
