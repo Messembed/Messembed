@@ -9,13 +9,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateMessageDto } from './dtos/CreateMessage.dto';
+import { CreateMessageDto } from './dto/CreateMessage.dto';
 import { Message } from './entities/Message.entity';
 import { MessagesService } from './messages.service';
 import { ChatPathDto } from '../chats/dto/ChatPath.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GetMessagesFiltersDto } from './dtos/GetMessagesFilters.dto';
-import { PaginatedMessagesDto } from './dtos/PaginatedMessages.dto';
+import { GetMessagesFiltersDto } from './dto/GetMessagesFilters.dto';
+import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
 import { JwtOrExternalServiceAuthGuard } from '../auth/guards/JwtOrExternalServiceAuthGuard.guard';
 
 @Controller()

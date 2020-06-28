@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { MessagesRepository } from './repositories/Messages.repository';
 import { CreateMessageOptions } from './interfaces/CreateMessageOptions.interface';
 import { Message } from './entities/Message.entity';
-import { GetMessagesFiltersDto } from './dtos/GetMessagesFilters.dto';
+import { GetMessagesFiltersDto } from './dto/GetMessagesFilters.dto';
 import _ from 'lodash';
 import { MoreThan, LessThan } from 'typeorm';
 import { ChatsRepository } from '../chats/repositories/Chats.repository';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
-import { PaginatedMessagesDto } from './dtos/PaginatedMessages.dto';
+import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
 
 @Injectable()
 export class MessagesService {
