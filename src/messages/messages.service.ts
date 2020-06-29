@@ -1,20 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { MessagesRepository } from './repositories/Messages.repository';
 import { CreateMessageOptions } from './interfaces/CreateMessageOptions.interface';
 import { Message } from './entities/Message.entity';
 import { GetMessagesFiltersDto } from './dto/GetMessagesFilters.dto';
 import _ from 'lodash';
-import { MoreThan, LessThan } from 'typeorm';
+import { MoreThan, LessThan, Not } from 'typeorm';
 import { ChatsRepository } from '../chats/repositories/Chats.repository';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
 import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
 import { ChatsService } from '../chats/chats.service';
+import { UnreadMessagesCountPerChat } from './interfaces/UnreadMessagesCountPerChat.interface';
 
 @Injectable()
 export class MessagesService {
   constructor(
     private readonly messagesRepo: MessagesRepository,
+    @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
     private readonly chatsRepo: ChatsRepository,
   ) {}
@@ -29,6 +31,15 @@ export class MessagesService {
     const msg = new Message(options);
 
     await this.messagesRepo.save(msg);
+
+    await this.messagesRepo.update(
+      {
+        chatId: options.chatId,
+        userId: Not(options.userId),
+        read: false,
+      },
+      { read: true },
+    );
 
     await this.chatsRepo.update(options.chatId, {
       lastMessageId: msg.id,
@@ -85,5 +96,42 @@ export class MessagesService {
     });
 
     return messages;
+  }
+
+  async getUnreadMessagesCountPerChatForUser(
+    userId: string,
+  ): Promise<UnreadMessagesCountPerChat> {
+    const unreadMessagesCountPerChat = await this.messagesRepo
+      .createQueryBuilder('messages')
+      .select([
+        'messages.chatId as "chatId"',
+        'COUNT(messages.id) as "unreadCount"',
+      ])
+      .where('messages.userId <> :currentUserId', { currentUserId: userId })
+      .andWhere('messages.read = False')
+      .groupBy('messages.chatId')
+      .getRawMany<{ chatId: number; unreadCount: number }>();
+
+    return unreadMessagesCountPerChat.reduce<UnreadMessagesCountPerChat>(
+      (acc, unreadCountPerChat) => {
+        acc[unreadCountPerChat.chatId] = unreadCountPerChat.unreadCount;
+        return acc;
+      },
+      {},
+    );
+  }
+
+  async getUnreadMessageCountOfChatForUser(
+    userId: string,
+    chatId: number,
+  ): Promise<number> {
+    return await this.messagesRepo
+      .createQueryBuilder('messages')
+      .where('messages.userId <> :currentUserId', { currentUserId: userId })
+      .andWhere('messages.read = False')
+      .andWhere('messages.chatId = :chatId', {
+        chatId,
+      })
+      .getCount();
   }
 }

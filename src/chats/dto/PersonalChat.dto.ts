@@ -2,9 +2,9 @@ import { Message } from '../../messages/entities/Message.entity';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/User.entity';
 import { DeepPartial } from 'typeorm';
-import _ from 'lodash';
 import { Chat } from '../entities/Chat.entity';
 import { classToPlain } from 'class-transformer';
+import { UnreadMessagesCountPerChat } from '../../messages/interfaces/UnreadMessagesCountPerChat.interface';
 
 export class PersonalChatDto {
   @ApiProperty()
@@ -38,22 +38,23 @@ export class PersonalChatDto {
   companion: User;
 
   @ApiProperty()
-  read: boolean;
+  unreadMessagesCount: number;
 
-  static createFromChat(chat: Chat, userId: string): PersonalChatDto;
-  static createFromChat(chats: Chat[], userId: string): PersonalChatDto[];
-  static createFromChat(
-    chats: Chat | Chat[],
+  static createFromChats(
+    chats: Chat[],
     userId: string,
-  ): PersonalChatDto | PersonalChatDto[] {
-    if (_.isArray(chats)) {
-      return chats.map(chat => this._createFromChat(chat, userId));
-    }
-
-    return this._createFromChat(chats, userId);
+    unreadMessagesCountPerChat: UnreadMessagesCountPerChat,
+  ): PersonalChatDto[] {
+    return chats.map(chat =>
+      this.createFromChat(chat, userId, unreadMessagesCountPerChat[chat.id]),
+    );
   }
 
-  private static _createFromChat(chat: Chat, userId: string): PersonalChatDto {
+  static createFromChat(
+    chat: Chat,
+    userId: string,
+    unreadMessagesCount: number | void,
+  ): PersonalChatDto {
     const plainChat: any = classToPlain(chat);
 
     return new PersonalChatDto({
@@ -70,11 +71,7 @@ export class PersonalChatDto {
         plainChat.firstCompanion.id !== userId
           ? plainChat.firstCompanion
           : plainChat.secondCompanion,
-      read: plainChat.lastMessage
-        ? plainChat.lastMessage.userId === userId
-          ? true
-          : plainChat.lastMessage.read
-        : true,
+      unreadMessagesCount: unreadMessagesCount || 0,
     });
   }
 
