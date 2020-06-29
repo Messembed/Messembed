@@ -8,16 +8,24 @@ import { MoreThan, LessThan } from 'typeorm';
 import { ChatsRepository } from '../chats/repositories/Chats.repository';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
+import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
+import { ChatsService } from '../chats/chats.service';
 
 @Injectable()
 export class MessagesService {
   constructor(
     private readonly messagesRepo: MessagesRepository,
+    private readonly chatsService: ChatsService,
     private readonly chatsRepo: ChatsRepository,
   ) {}
 
   @Transactional()
   async createMessage(options: CreateMessageOptions): Promise<Message> {
+    await this.chatsService.findChatByIdAndCompanionOrFailHttp(
+      options.chatId,
+      options.userId,
+    );
+
     const msg = new Message(options);
 
     await this.messagesRepo.save(msg);
@@ -27,6 +35,19 @@ export class MessagesService {
     });
 
     return msg;
+  }
+
+  async getPaginatedMessagesConsideringAccessRights(
+    authData: RequestAuthData,
+    chatId: number,
+    filters?: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesDto> {
+    const chat = await this.chatsService.getChatConsideringAccessRights(
+      chatId,
+      authData,
+    );
+
+    return this.getPaginatedMessages(chat.id, filters);
   }
 
   async getPaginatedMessages(
@@ -50,6 +71,7 @@ export class MessagesService {
       : !_.isNil(filters?.beforeId)
       ? LessThan(filters?.beforeId)
       : undefined;
+
     const messages = await this.messagesRepo.find({
       where: {
         chatId,

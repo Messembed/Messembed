@@ -17,9 +17,10 @@ import { ChatPathDto } from './dto/ChatPath.dto';
 import { EditChatDto } from './dto/EditChat.dto';
 import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
 import { PersonalChatDto } from './dto/PersonalChat.dto';
-import { UserPathDto } from '../users/dto/UserPath.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/ExternalServiceAuthGuard.guard';
-import { JwtOrExternalServiceAuthGuard } from '../auth/guards/JwtOrExternalServiceAuthGuard.guard';
+import { AuthData } from '../auth/decorators/AuthData.decorator';
+import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
+import { JwtAuthGuard } from '../auth/guards/JwtAuthGuard.guard';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -45,7 +46,7 @@ export class ChatsController {
   }
 
   @Get('chats/:chatId')
-  @UseGuards(JwtOrExternalServiceAuthGuard)
+  @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => Chat })
   async getChat(@Param() { chatId }: ChatPathDto): Promise<Chat> {
     return this.chatsService.getChat(chatId);
@@ -58,12 +59,25 @@ export class ChatsController {
     return this.chatsService.getAllChats();
   }
 
-  @Get('users/:userId/personalChats')
-  @UseGuards(JwtOrExternalServiceAuthGuard)
+  @Get('me/personalChats')
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
   async getPersonalChats(
-    @Param() { userId }: UserPathDto,
+    @AuthData() authData: RequestAuthData,
   ): Promise<PersonalChatDto[]> {
-    return this.chatsService.getPersonalChats(userId);
+    return this.chatsService.getPersonalChatsOfUser(authData.user.id);
+  }
+
+  @Get('me/personalChats/:chatId')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: () => PersonalChatDto })
+  async getPersonalChat(
+    @Param() { chatId }: ChatPathDto,
+    @AuthData() authData: RequestAuthData,
+  ): Promise<PersonalChatDto> {
+    return this.chatsService.getPersonalChatOfUserOrFailHttp(
+      authData.user.id,
+      chatId,
+    );
   }
 }

@@ -4,9 +4,13 @@ import { MessagesController } from './messages.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessagesRepository } from './repositories/Messages.repository';
 import { ChatsRepository } from '../chats/repositories/Chats.repository';
+import { ChatsModule } from '../chats/chats.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([MessagesRepository, ChatsRepository])],
+  imports: [
+    ChatsModule,
+    TypeOrmModule.forFeature([MessagesRepository, ChatsRepository]),
+  ],
   providers: [MessagesService],
   controllers: [MessagesController],
   exports: [MessagesService],
