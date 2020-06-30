@@ -80,4 +80,14 @@ export class ChatsController {
       chatId,
     );
   }
+
+  @Post('me/personalChats/:chatId/actions/read')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: () => PersonalChatDto })
+  async setRead(
+    @Param() { chatId }: ChatPathDto,
+    @AuthData() authData: RequestAuthData,
+  ): Promise<PersonalChatDto> {
+    return this.chatsService.readPersonalChatAsUser(chatId, authData.user.id);
+  }
 }

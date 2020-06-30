@@ -32,14 +32,7 @@ export class MessagesService {
 
     await this.messagesRepo.save(msg);
 
-    await this.messagesRepo.update(
-      {
-        chatId: options.chatId,
-        userId: Not(options.userId),
-        read: false,
-      },
-      { read: true },
-    );
+    await this.readMessagesAsUser(options.chatId, options.userId);
 
     await this.chatsRepo.update(options.chatId, {
       lastMessageId: msg.id,
@@ -133,5 +126,16 @@ export class MessagesService {
         chatId,
       })
       .getCount();
+  }
+
+  async readMessagesAsUser(chatId: number, userId: string): Promise<void> {
+    await this.messagesRepo.update(
+      {
+        chatId: chatId,
+        userId: Not(userId),
+        read: false,
+      },
+      { read: true },
+    );
   }
 }

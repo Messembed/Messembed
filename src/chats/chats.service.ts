@@ -43,6 +43,12 @@ export class ChatsService {
     return new PaginatedChatsDto(chats, totalCount);
   }
 
+  /**
+   * Находит и возвращает чаты, в которых пользователь с данным
+   * ID является собеседником.
+   * Но, этот метод возвращает не чистых представителей класса Chat,
+   * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
+   */
   async getPersonalChatsOfUser(userId: string): Promise<PersonalChatDto[]> {
     const chats = await this.chatsRepo
       .createQueryBuilder('chats')
@@ -66,6 +72,12 @@ export class ChatsService {
     return personalChats;
   }
 
+  /**
+   * Почти то же самое, что и ChatsService#getPersonalChatsOfUser,
+   * отличие в том, что первый возвращает список, а данный метод
+   * предназначен для получения одного конкретного чата.
+   * Если чат не найден, то выбрасывается ошибка HttpException
+   */
   async getPersonalChatOfUserOrFailHttp(
     userId: string,
     chatId: number,
@@ -88,6 +100,19 @@ export class ChatsService {
     );
   }
 
+  /**
+   * Находит чат по его идентификатору.
+   * Так же проверяет права доступа к этому
+   * чату учитывая переданный RequestAuthData.
+   * Если нет чата с таким идентификатором, или
+   * данный клиент не имеет права доступа к этому чату,
+   * то выбрасывается ошибка HttpException.
+   *
+   * Данный клиент имеет права доступа к этому чату
+   * если он:
+   * 1. является external service-ом, или;
+   * 2. является участником чата.
+   */
   async getChatConsideringAccessRights(
     chatId: number,
     authData: RequestAuthData,
@@ -99,6 +124,11 @@ export class ChatsService {
     return chat;
   }
 
+  /**
+   * Находит чат по его идентификатору и по идентификатору
+   * одного из собеседников в этом чате. Если не находит,
+   * то выбрасывает HttpException
+   */
   async findChatByIdAndCompanionOrFailHttp(
     chatId: number,
     userId: string,
@@ -115,5 +145,19 @@ export class ChatsService {
         },
       ],
     });
+  }
+
+  /**
+   * По функционалу эта функция то же самое, что
+   * и MessagesService#readMessagesAsUser, с единственным
+   * отличием - она возвращает PersonalChat
+   */
+  async readPersonalChatAsUser(
+    chatId: number,
+    userId: string,
+  ): Promise<PersonalChatDto> {
+    await this.messagesService.readMessagesAsUser(chatId, userId);
+
+    return this.getPersonalChatOfUserOrFailHttp(userId, chatId);
   }
 }
