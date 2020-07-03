@@ -59,7 +59,7 @@ export class ChatsController {
     return this.chatsService.getAllChats();
   }
 
-  @Get('me/personalChats')
+  @Get('user/personal-chats')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
   async getPersonalChats(
@@ -68,7 +68,7 @@ export class ChatsController {
     return this.chatsService.getPersonalChatsOfUser(authData.user.id);
   }
 
-  @Get('me/personalChats/:chatId')
+  @Get('user/personal-chats/:chatId')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto })
   async getPersonalChat(
@@ -81,7 +81,7 @@ export class ChatsController {
     );
   }
 
-  @Post('me/personalChats/:chatId/actions/read')
+  @Post('user/personal-chats/:chatId/read-status')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto })
   async setRead(

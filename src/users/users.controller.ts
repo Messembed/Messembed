@@ -57,7 +57,7 @@ export class UsersController {
     return this.usersService.findAllUsers();
   }
 
-  @Get('me')
+  @Get('user')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => User })
   async getMe(@AuthData() authData: RequestAuthData): Promise<User> {

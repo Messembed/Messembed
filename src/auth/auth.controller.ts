@@ -18,7 +18,7 @@ import { UserPathDto } from '../users/dto/UserPath.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('users/:userId/createAccessToken')
+  @Post('users/:userId/access-tokens')
   @UseGuards(ExternalServiceAuthGuard)
   @ApiBasicAuth()
   @ApiCreatedResponse({ type: () => AccessTokenDto })
