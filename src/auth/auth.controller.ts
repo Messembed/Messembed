@@ -5,6 +5,8 @@ import {
   Post,
   Param,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiCreatedResponse, ApiBasicAuth } from '@nestjs/swagger';
 import { AccessTokenDto } from './dto/AccessToken.dto';
@@ -15,6 +17,12 @@ import { UserPathDto } from '../users/dto/UserPath.dto';
 @Controller()
 @ApiTags('Auth')
 @UseInterceptors(ClassSerializerInterceptor)
+@UsePipes(
+  new ValidationPipe({
+    whitelist: true,
+    transform: true,
+  }),
+)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

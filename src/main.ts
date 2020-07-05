@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { setupSwagger } from './lib/setup-swagger';
 import { ConfigService } from '@nestjs/config';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { initializeTransactionalContext } from 'typeorm-transactional-cls-hooked';
 
 const logger = new Logger('bootstrap');
@@ -11,13 +11,6 @@ async function bootstrap() {
   initializeTransactionalContext();
 
   const app = await NestFactory.create(AppModule);
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
 
   setupSwagger(app);
 

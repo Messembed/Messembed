@@ -8,6 +8,8 @@ import {
   ClassSerializerInterceptor,
   Query,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { CreateMessageDto } from './dto/CreateMessage.dto';
 import { Message } from './entities/Message.entity';
@@ -19,9 +21,8 @@ import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
 import { JwtOrExternalServiceAuthGuard } from '../auth/guards/JwtOrExternalServiceAuthGuard.guard';
 import { AuthData } from '../auth/decorators/AuthData.decorator';
 import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
-import { ExternalServiceAuthGuard } from '../auth/guards/ExternalServiceAuthGuard.guard';
-import { JwtAuthGuard } from '../auth/guards/JwtAuthGuard.guard';
-import { CreateMessageAsExternalServiceDto } from './dto/CreateMessageAsExternalService.dto';
+import { ExtendedValidationPipe } from '../common/pipes/extended-validation.pipe';
+import { ValidationGroup } from '../common/constants/validation-group.enum';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -29,21 +30,22 @@ import { CreateMessageAsExternalServiceDto } from './dto/CreateMessageAsExternal
 export class MessagesController {
   constructor(private readonly messagesService: MessagesService) {}
 
-  @Post('chats/:chatId/messages/actions/createMessageAsExternalService')
-  @UseGuards(ExternalServiceAuthGuard)
-  @ApiCreatedResponse({ type: () => Message })
-  async createMessageAsExternalService(
-    @Param() { chatId }: ChatPathDto,
-    @Body() dto: CreateMessageAsExternalServiceDto,
-  ): Promise<Message> {
-    return this.messagesService.createMessage({
-      ...dto,
-      chatId,
-    });
-  }
-
   @Post('chats/:chatId/messages')
-  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    ExtendedValidationPipe(
+      {
+        whitelist: true,
+        transform: true,
+      },
+      req => [
+        ValidationGroup.ALL,
+        req.user.isExternalService
+          ? ValidationGroup.EXT_SER
+          : ValidationGroup.USER,
+      ],
+    ),
+  )
+  @UseGuards(JwtOrExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => Message })
   async createMessage(
     @Param() { chatId }: ChatPathDto,
@@ -53,12 +55,18 @@ export class MessagesController {
     return this.messagesService.createMessage({
       ...createDto,
       chatId,
-      userId: authData.user.id,
+      userId: createDto.userId ?? authData.user.id,
     });
   }
 
   @Get('chats/:chatId/messages')
   @UseGuards(JwtOrExternalServiceAuthGuard)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
   @ApiOkResponse({ type: () => PaginatedMessagesDto, isArray: true })
   async getMessages(
     @Param() { chatId }: ChatPathDto,

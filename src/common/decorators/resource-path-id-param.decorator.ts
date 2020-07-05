@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptions } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt } from 'class-validator';
+import { IsInt, ValidationOptions } from 'class-validator';
 
 /**
  * @example
@@ -19,10 +19,11 @@ import { IsInt } from 'class-validator';
  */
 export function ResourcePathIdParam(
   options?: ApiPropertyOptions,
+  validationOptions?: ValidationOptions,
 ): PropertyDecorator {
   return applyDecorators(
     ApiProperty(options),
     Type(() => Number),
-    IsInt(),
+    IsInt(validationOptions),
   );
 }

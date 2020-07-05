@@ -8,6 +8,8 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Chat } from './entities/Chat.entity';
 import { ChatsService } from './chats.service';
@@ -25,6 +27,12 @@ import { JwtAuthGuard } from '../auth/guards/JwtAuthGuard.guard';
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Chat')
+@UsePipes(
+  new ValidationPipe({
+    whitelist: true,
+    transform: true,
+  }),
+)
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
