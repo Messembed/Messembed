@@ -10,6 +10,7 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { Chat } from './entities/Chat.entity';
 import { ChatsService } from './chats.service';
@@ -23,6 +24,7 @@ import { ExternalServiceAuthGuard } from '../auth/guards/ExternalServiceAuthGuar
 import { AuthData } from '../auth/decorators/AuthData.decorator';
 import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
 import { JwtAuthGuard } from '../auth/guards/JwtAuthGuard.guard';
+import { ChatsQueryDto } from './dto/ChatsQuery.dto';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -71,9 +73,10 @@ export class ChatsController {
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
   async getPersonalChats(
+    @Query() query: ChatsQueryDto,
     @AuthData() authData: RequestAuthData,
   ): Promise<PersonalChatDto[]> {
-    return this.chatsService.getPersonalChatsOfUser(authData.user.id);
+    return this.chatsService.getPersonalChatsOfUser(authData.user.id, query);
   }
 
   @Get('user/personal-chats/:chatId')

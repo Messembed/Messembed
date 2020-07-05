@@ -7,6 +7,7 @@ import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
 import { PersonalChatDto } from './dto/PersonalChat.dto';
 import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
 import { MessagesService } from '../messages/messages.service';
+import { ChatsQueryDto } from './dto/ChatsQuery.dto';
 
 @Injectable()
 export class ChatsService {
@@ -49,13 +50,27 @@ export class ChatsService {
    * Но, этот метод возвращает не чистых представителей класса Chat,
    * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
    */
-  async getPersonalChatsOfUser(userId: string): Promise<PersonalChatDto[]> {
-    const chats = await this.chatsRepo
+  async getPersonalChatsOfUser(
+    userId: string,
+    query?: ChatsQueryDto,
+  ): Promise<PersonalChatDto[]> {
+    const qb = this.chatsRepo
       .createQueryBuilder('chats')
       .leftJoinAndSelect('chats.lastMessage', 'lastMessage')
       .leftJoinAndSelect('chats.firstCompanion', 'firstCompanion')
       .leftJoinAndSelect('chats.secondCompanion', 'secondCompanion')
-      .where([{ firstCompanionId: userId }, { secondCompanionId: userId }])
+      .where(
+        `((chats.firstCompanionId = :userId) OR (chats.secondCompanionId = :userId))`,
+        { userId },
+      );
+
+    if (query && query.externalMetadata) {
+      qb.andWhere(`chats.externalMetadata @> :externalMetadataQuery::jsonb`, {
+        externalMetadataQuery: JSON.stringify(query.externalMetadata),
+      });
+    }
+
+    const chats = await qb
       .orderBy('COALESCE(lastMessage.createdAt, chats.createdAt)', 'DESC')
       .getMany();
 
