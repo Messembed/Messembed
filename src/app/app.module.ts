@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { AppController } from './app.controller';
 import { AppResolver } from './app.resolver';
+import { GraphqlApiModule } from '../graphql-api/graphql-api.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AppResolver } from './app.resolver';
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
     }),
+    GraphqlApiModule,
   ],
   controllers: [AppController],
   providers: [AppResolver],
