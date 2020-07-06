@@ -12,7 +12,7 @@ export class ChatGqlType {
   @Field()
   updatedAt: Date;
 
-  @Field()
+  @Field({ nullable: true })
   deletedAt?: Date | null;
 
   @Field()
@@ -27,12 +27,12 @@ export class ChatGqlType {
   @Field()
   secondCompanionId: string;
 
-  @Field(() => GraphQLJSON)
+  @Field(() => GraphQLJSON, { nullable: true })
   externalMetadata?: Record<string, unknown> | null;
 
-  @Field(() => GraphQLJSON)
+  @Field(() => GraphQLJSON, { nullable: true })
   privateExternalMetadata?: Record<string, unknown> | null;
 
-  @Field()
-  lastMessageId: number;
+  @Field({ nullable: true })
+  lastMessageId?: number;
 }
