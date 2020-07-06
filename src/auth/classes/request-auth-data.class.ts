@@ -1,4 +1,4 @@
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 
 export class RequestAuthData {
   user?: User;

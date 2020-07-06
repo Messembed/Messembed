@@ -1,13 +1,13 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { ChatsRepository } from './repositories/Chats.repository';
-import { Chat } from './entities/Chat.entity';
-import { CreateChatDto } from './dto/CreateChat.dto';
-import { EditChatDto } from './dto/EditChat.dto';
-import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
-import { PersonalChatDto } from './dto/PersonalChat.dto';
-import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
+import { ChatsRepository } from './repositories/chats.repository';
+import { Chat } from './entities/chat.entity';
+import { CreateChatDto } from './dto/create-chat.dto';
+import { EditChatDto } from './dto/edit-chat.dto';
+import { PaginatedChatsDto } from './dto/paginated-chats.dto';
+import { PersonalChatDto } from './dto/personal-chat.dto';
+import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { MessagesService } from '../messages/messages.service';
-import { ChatsQueryDto } from './dto/ChatsQuery.dto';
+import { ChatsQueryDto } from './dto/chats-query.dto';
 
 @Injectable()
 export class ChatsService {

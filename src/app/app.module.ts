@@ -18,12 +18,6 @@ import { GraphQLModule } from '@nestjs/graphql';
     ConfigModule.forRoot(configModuleOptions),
     GraphQLModule.forRoot({
       autoSchemaFile: 'schema.gql',
-      // context: ctx => {
-      //   return {
-      //     req: ctx.req,
-      //     res: ctx.res,
-      //   };
-      // },
     }),
   ],
 })

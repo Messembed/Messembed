@@ -1,5 +1,5 @@
-import { AbstractPaginated } from '../../common/classes/AbstractPaginated.class';
-import { User } from '../entities/User.entity';
+import { AbstractPaginated } from '../../common/classes/abstract-paginated.class';
+import { User } from '../entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginatedUsersDto extends AbstractPaginated<User> {

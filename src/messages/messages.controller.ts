@@ -11,16 +11,16 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { CreateMessageDto } from './dto/CreateMessage.dto';
-import { Message } from './entities/Message.entity';
+import { CreateMessageDto } from './dto/create-message.dto';
+import { Message } from './entities/message.entity';
 import { MessagesService } from './messages.service';
-import { ChatPathDto } from '../chats/dto/ChatPath.dto';
+import { ChatPathDto } from '../chats/dto/chat-path.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GetMessagesFiltersDto } from './dto/GetMessagesFilters.dto';
-import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
-import { JwtOrExternalServiceAuthGuard } from '../auth/guards/JwtOrExternalServiceAuthGuard.guard';
-import { AuthData } from '../auth/decorators/AuthData.decorator';
-import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
+import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
+import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
+import { JwtOrExternalServiceAuthGuard } from '../auth/guards/jwt-or-external-service-auth.guard';
+import { AuthData } from '../auth/decorators/auth-data.decorator';
+import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ExtendedValidationPipe } from '../common/pipes/extended-validation.pipe';
 import { ValidationGroup } from '../common/constants/validation-group.enum';
 

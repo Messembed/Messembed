@@ -10,16 +10,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './entities/User.entity';
-import { CreateUserDto } from './dto/CreateUser.dto';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { UserPathDto } from './dto/UserPath.dto';
-import { EditUserDto } from './dto/EditUser.dto';
-import { PaginatedUsersDto } from './dto/PaginatedUsers.dto';
-import { ExternalServiceAuthGuard } from '../auth/guards/ExternalServiceAuthGuard.guard';
-import { AuthData } from '../auth/decorators/AuthData.decorator';
-import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
-import { JwtAuthGuard } from '../auth/guards/JwtAuthGuard.guard';
+import { UserPathDto } from './dto/user-path.dto';
+import { EditUserDto } from './dto/edit-user.dto';
+import { PaginatedUsersDto } from './dto/paginated-users.dto';
+import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
+import { AuthData } from '../auth/decorators/auth-data.decorator';
+import { RequestAuthData } from '../auth/classes/request-auth-data.class';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)

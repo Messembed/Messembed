@@ -1,16 +1,16 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { MessagesRepository } from './repositories/Messages.repository';
-import { CreateMessageOptions } from './interfaces/CreateMessageOptions.interface';
-import { Message } from './entities/Message.entity';
-import { GetMessagesFiltersDto } from './dto/GetMessagesFilters.dto';
+import { MessagesRepository } from './repositories/messages.repository';
+import { CreateMessageOptions } from './interfaces/create-message-options.interface';
+import { Message } from './entities/message.entity';
+import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
 import _ from 'lodash';
 import { MoreThan, LessThan, Not } from 'typeorm';
-import { ChatsRepository } from '../chats/repositories/Chats.repository';
+import { ChatsRepository } from '../chats/repositories/chats.repository';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
-import { PaginatedMessagesDto } from './dto/PaginatedMessages.dto';
-import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
+import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
+import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatsService } from '../chats/chats.service';
-import { UnreadMessagesCountPerChat } from './interfaces/UnreadMessagesCountPerChat.interface';
+import { UnreadMessagesCountPerChat } from './interfaces/unread-messages-count-per-chat.interface';
 
 @Injectable()
 export class MessagesService {

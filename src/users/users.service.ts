@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from './repositories/Users.repository';
-import { CreateUserDto } from './dto/CreateUser.dto';
-import { User } from './entities/User.entity';
-import { EditUserDto } from './dto/EditUser.dto';
-import { PaginatedUsersDto } from './dto/PaginatedUsers.dto';
+import { UsersRepository } from './repositories/users.repository';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+import { EditUserDto } from './dto/edit-user.dto';
+import { PaginatedUsersDto } from './dto/paginated-users.dto';
 
 @Injectable()
 export class UsersService {

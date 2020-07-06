@@ -1,7 +1,7 @@
 import { IsInt, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { TransformInt } from '../../common/utils/TransformInt.util';
+import { TransformInt } from '../../common/utils/transform-int.util';
 
 export class GetMessagesFiltersDto {
   @ApiPropertyOptional()

@@ -1,4 +1,4 @@
-import { Paginated } from '../interfaces/Paginated.interface';
+import { Paginated } from '../interfaces/paginated.interface';
 import { ApiProperty } from '@nestjs/swagger';
 
 export abstract class AbstractPaginated<Entity> implements Paginated<Entity> {

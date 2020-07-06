@@ -9,10 +9,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiCreatedResponse, ApiBasicAuth } from '@nestjs/swagger';
-import { AccessTokenDto } from './dto/AccessToken.dto';
+import { AccessTokenDto } from './dto/access-token.dto';
 import { AuthService } from './auth.service';
-import { ExternalServiceAuthGuard } from './guards/ExternalServiceAuthGuard.guard';
-import { UserPathDto } from '../users/dto/UserPath.dto';
+import { ExternalServiceAuthGuard } from './guards/external-service-auth.guard';
+import { UserPathDto } from '../users/dto/user-path.dto';
 
 @Controller()
 @ApiTags('Auth')

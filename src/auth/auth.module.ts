@@ -4,9 +4,9 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConfigType, JWT_CONFIG_KEY } from '../config/jwt.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersRepository } from '../users/repositories/Users.repository';
-import { JwtStrategy } from './strategies/JwtStrategy.strategy';
-import { ExternalServiceBasicStrategy } from './strategies/ExternalServiceBasicStrategy.strategy';
+import { UsersRepository } from '../users/repositories/users.repository';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { ExternalServiceBasicStrategy } from './strategies/external-service-basic.strategy';
 import { AuthResolver } from './auth.resolver';
 
 @Module({

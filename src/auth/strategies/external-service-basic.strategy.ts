@@ -1,11 +1,11 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
-import { RequestAuthData } from '../classes/RequestAuthData.class';
+import { RequestAuthData } from '../classes/request-auth-data.class';
 import {
   EXTERNAL_SERVICE_CONFIG_KEY,
   ExternalServiceConfigType,
-} from '../../config/externalService.config';
+} from '../../config/external-service.config';
 import secureCompare from 'secure-compare';
 
 @Injectable()

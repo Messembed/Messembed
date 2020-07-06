@@ -12,19 +12,19 @@ import {
   ValidationPipe,
   Query,
 } from '@nestjs/common';
-import { Chat } from './entities/Chat.entity';
+import { Chat } from './entities/chat.entity';
 import { ChatsService } from './chats.service';
-import { CreateChatDto } from './dto/CreateChat.dto';
+import { CreateChatDto } from './dto/create-chat.dto';
 import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { ChatPathDto } from './dto/ChatPath.dto';
-import { EditChatDto } from './dto/EditChat.dto';
-import { PaginatedChatsDto } from './dto/PaginatedChats.dto';
-import { PersonalChatDto } from './dto/PersonalChat.dto';
-import { ExternalServiceAuthGuard } from '../auth/guards/ExternalServiceAuthGuard.guard';
-import { AuthData } from '../auth/decorators/AuthData.decorator';
-import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
-import { JwtAuthGuard } from '../auth/guards/JwtAuthGuard.guard';
-import { ChatsQueryDto } from './dto/ChatsQuery.dto';
+import { ChatPathDto } from './dto/chat-path.dto';
+import { EditChatDto } from './dto/edit-chat.dto';
+import { PaginatedChatsDto } from './dto/paginated-chats.dto';
+import { PersonalChatDto } from './dto/personal-chat.dto';
+import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
+import { AuthData } from '../auth/decorators/auth-data.decorator';
+import { RequestAuthData } from '../auth/classes/request-auth-data.class';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ChatsQueryDto } from './dto/chats-query.dto';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)

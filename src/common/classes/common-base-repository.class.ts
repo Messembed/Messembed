@@ -1,8 +1,8 @@
 import { FindOneOptions, FindConditions, ObjectID } from 'typeorm';
-import { ErrorGenerator, ErrorCode } from './ErrorGenerator.class';
+import { ErrorGenerator, ErrorCode } from './error-generator.class';
 import { Type } from '@nestjs/common';
-import { User } from '../../users/entities/User.entity';
-import { Chat } from '../../chats/entities/Chat.entity';
+import { User } from '../../users/entities/user.entity';
+import { Chat } from '../../chats/entities/chat.entity';
 import { BaseRepository } from 'typeorm-transactional-cls-hooked';
 
 const entitiesMappedToErrorCodes = new Map<Type<any>, ErrorCode>([

@@ -2,7 +2,7 @@ import { Resolver, Mutation, Args, Query, ID } from '@nestjs/graphql';
 import { AccessTokenGraphQLType } from './graphql-types/access-token.graphql-type';
 import { AuthService } from './auth.service';
 import { UseGuards } from '@nestjs/common';
-import { ExternalServiceAuthGuard } from './guards/ExternalServiceAuthGuard.guard';
+import { ExternalServiceAuthGuard } from './guards/external-service-auth.guard';
 
 @Resolver()
 export class AuthResolver {

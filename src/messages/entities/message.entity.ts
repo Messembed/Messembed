@@ -10,8 +10,8 @@ import {
   DeepPartial,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { User } from '../../users/entities/User.entity';
-import { Chat } from '../../chats/entities/Chat.entity';
+import { User } from '../../users/entities/user.entity';
+import { Chat } from '../../chats/entities/chat.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity({

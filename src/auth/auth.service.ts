@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../users/entities/User.entity';
-import { AccessTokenDto } from './dto/AccessToken.dto';
-import { JwtAuthTokenPayload } from './interfaces/JwtAuthTokenPayload.interface';
+import { User } from '../users/entities/user.entity';
+import { AccessTokenDto } from './dto/access-token.dto';
+import { JwtAuthTokenPayload } from './interfaces/jwt-auth-token-payload.interface';
 import { JwtService } from '@nestjs/jwt';
-import { UsersRepository } from '../users/repositories/Users.repository';
+import { UsersRepository } from '../users/repositories/users.repository';
 
 @Injectable()
 export class AuthService {

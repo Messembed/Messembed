@@ -1,4 +1,4 @@
-import { Message } from '../entities/Message.entity';
+import { Message } from '../entities/message.entity';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { DeepPartial } from 'typeorm';
 

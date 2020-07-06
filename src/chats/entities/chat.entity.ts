@@ -12,8 +12,8 @@ import {
   OneToOne,
 } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { User } from '../../users/entities/User.entity';
-import { Message } from '../../messages/entities/Message.entity';
+import { User } from '../../users/entities/user.entity';
+import { Message } from '../../messages/entities/message.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity({

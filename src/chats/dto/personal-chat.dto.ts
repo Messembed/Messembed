@@ -1,10 +1,10 @@
-import { Message } from '../../messages/entities/Message.entity';
+import { Message } from '../../messages/entities/message.entity';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import { User } from '../../users/entities/User.entity';
+import { User } from '../../users/entities/user.entity';
 import { DeepPartial } from 'typeorm';
-import { Chat } from '../entities/Chat.entity';
+import { Chat } from '../entities/chat.entity';
 import { classToPlain } from 'class-transformer';
-import { UnreadMessagesCountPerChat } from '../../messages/interfaces/UnreadMessagesCountPerChat.interface';
+import { UnreadMessagesCountPerChat } from '../../messages/interfaces/unread-messages-count-per-chat.interface';
 
 export class PersonalChatDto {
   @ApiProperty()

@@ -1,4 +1,4 @@
-import { RequestAuthData } from '../auth/classes/RequestAuthData.class';
+import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 
 declare global {
   namespace Express {
