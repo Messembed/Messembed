@@ -7,6 +7,8 @@ import { UsersModule } from '../users/users.module';
 import { MessagesModule } from '../messages/messages.module';
 import { AuthModule } from '../auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
+import { AppController } from './app.controller';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -20,5 +22,7 @@ import { GraphQLModule } from '@nestjs/graphql';
       autoSchemaFile: 'schema.gql',
     }),
   ],
+  controllers: [AppController],
+  providers: [AppResolver],
 })
 export class AppModule {}
