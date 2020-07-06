@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersRepository } from '../users/repositories/Users.repository';
 import { JwtStrategy } from './strategies/JwtStrategy.strategy';
 import { ExternalServiceBasicStrategy } from './strategies/ExternalServiceBasicStrategy.strategy';
+import { AuthResolver } from './auth.resolver';
 
 @Module({
   imports: [
@@ -18,7 +19,12 @@ import { ExternalServiceBasicStrategy } from './strategies/ExternalServiceBasicS
       inject: [JWT_CONFIG_KEY],
     }),
   ],
-  providers: [AuthService, JwtStrategy, ExternalServiceBasicStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    ExternalServiceBasicStrategy,
+    AuthResolver,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

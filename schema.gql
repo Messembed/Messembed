@@ -1,0 +1,16 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AccessTokenGraphQLType {
+  """Access token"""
+  accessToken: String!
+}
+
+type Query {
+  ping: String!
+}
+
+type Mutation {
+  createAccessToken(userId: ID!): AccessTokenGraphQLType!
+}
