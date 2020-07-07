@@ -3,6 +3,7 @@ import { ChatsConnectionGqlType } from './gql-types/chats-connection.gql-type';
 import { LabadoMessengerSdk } from '../rest-api-client/labado-messenger.sdk';
 import { ChatGqlType } from './gql-types/chat.gql-type';
 import { GqlHeaders } from './decorators/gql-headers.decorator';
+import { PersonalChatGqlType } from './gql-types/personal-chat.gql-type';
 
 @Resolver('GraphqlApi')
 export class GraphqlApiResolver {
@@ -28,5 +29,12 @@ export class GraphqlApiResolver {
     @Args('chatId', { type: () => ID }) chatId: string,
   ): Promise<ChatGqlType> {
     return this.labadoMessengerSdk.getChat(chatId, authHeader);
+  }
+
+  @Query(() => [PersonalChatGqlType])
+  personalChats(
+    @GqlHeaders('authorization') authHeader: string,
+  ): Promise<PersonalChatGqlType[]> {
+    return this.labadoMessengerSdk.getPersonalChats(authHeader);
   }
 }

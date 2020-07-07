@@ -36,10 +36,23 @@ type ChatsConnectionGqlType {
   nodes: [ChatGqlType!]!
 }
 
+type PersonalChatGqlType {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  title: String!
+  active: Boolean!
+  externalMetadata: JSON
+  lastMessageId: ID!
+  unreadMessagesCount: Int!
+}
+
 type Query {
   ping: String!
   chatsConnection: ChatsConnectionGqlType!
   chat(chatId: ID!): ChatGqlType!
+  personalChats: [PersonalChatGqlType!]!
 }
 
 type Mutation {

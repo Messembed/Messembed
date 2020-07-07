@@ -6,6 +6,7 @@ import {
 } from './interfaces/creds.interface';
 import _ from 'lodash';
 import { Chat } from './interfaces/chat.interface';
+import { PersonalChat } from './interfaces/personal-chat.interface';
 
 export class LabadoMessengerSdk {
   protected axios: AxiosInstance;
@@ -40,6 +41,17 @@ export class LabadoMessengerSdk {
     );
 
     return this.parseDates([data], ['createdAt', 'updatedAt', 'deletedAt'])[0];
+  }
+
+  async getPersonalChats(
+    creds: LabadoMessengerUserCreds | string,
+  ): Promise<PersonalChat[]> {
+    const { data } = await this.axios.get<PersonalChat[]>(
+      `user/personal-chats`,
+      this.getAuthOptions(creds),
+    );
+
+    return this.parseDates(data, ['createdAt', 'updatedAt', 'deletedAt']);
   }
 
   protected parseDates<T extends Record<string, any>>(
