@@ -1,12 +1,12 @@
 import { Resolver, Query, Args, ID } from '@nestjs/graphql';
 import { ChatsConnectionGqlType } from './gql-types/chats-connection.gql-type';
-import { LabadoMessengerSdk } from '../rest-api-client/labado-messenger.sdk';
+import { LabadoMessengerSdk } from '../../rest-api-client/labado-messenger.sdk';
 import { ChatGqlType } from './gql-types/chat.gql-type';
-import { GqlHeaders } from './decorators/gql-headers.decorator';
+import { GqlHeaders } from '../decorators/gql-headers.decorator';
 import { PersonalChatGqlType } from './gql-types/personal-chat.gql-type';
 
-@Resolver('GraphqlApi')
-export class GraphqlApiResolver {
+@Resolver()
+export class ChatsQueryResolver {
   constructor(private readonly labadoMessengerSdk: LabadoMessengerSdk) {}
 
   @Query(() => ChatsConnectionGqlType)

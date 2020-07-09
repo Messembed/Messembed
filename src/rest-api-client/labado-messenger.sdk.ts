@@ -7,12 +7,23 @@ import {
 import _ from 'lodash';
 import { Chat } from './interfaces/chat.interface';
 import { PersonalChat } from './interfaces/personal-chat.interface';
+import { CreateChatData } from './interfaces/create-chat-data.interface';
+
+const DATE_FIELDS = ['createdAt', 'updatedAt', 'deletedAt'] as const;
 
 export class LabadoMessengerSdk {
   protected axios: AxiosInstance;
 
   constructor(baseURL: string) {
     this.axios = axios.create({ baseURL });
+    this.axios.interceptors.response.use(
+      response => {
+        return response;
+      },
+      error => {
+        return error;
+      },
+    );
   }
 
   async getAllChats(
@@ -25,7 +36,7 @@ export class LabadoMessengerSdk {
 
     const result = {
       ...data,
-      data: this.parseDates(data.data, ['createdAt', 'updatedAt', 'deletedAt']),
+      data: this.parseDates(data.data, DATE_FIELDS),
     };
 
     return result;
@@ -40,7 +51,7 @@ export class LabadoMessengerSdk {
       this.getAuthOptions(creds),
     );
 
-    return this.parseDates([data], ['createdAt', 'updatedAt', 'deletedAt'])[0];
+    return this.parseDates([data], DATE_FIELDS)[0];
   }
 
   async getPersonalChats(
@@ -51,13 +62,26 @@ export class LabadoMessengerSdk {
       this.getAuthOptions(creds),
     );
 
-    return this.parseDates(data, ['createdAt', 'updatedAt', 'deletedAt']);
+    return this.parseDates(data, DATE_FIELDS);
   }
 
-  protected parseDates<T extends Record<string, any>>(
+  async createChat(
+    createData: CreateChatData,
+    creds: LabadoMessengerExtSerCreds | string,
+  ): Promise<Chat> {
+    const { data } = await this.axios.post(
+      'chats',
+      createData,
+      this.getAuthOptions(creds),
+    );
+
+    return this.parseDates<any, Chat>([data], DATE_FIELDS)[0];
+  }
+
+  protected parseDates<T extends Record<string, any>, R = T>(
     data: T[],
-    dateFields: string[],
-  ): T[] {
+    dateFields: readonly string[],
+  ): R[] {
     data.map(obj => {
       dateFields.forEach(dateField => {
         const date = _.get(obj, dateField);
@@ -65,7 +89,7 @@ export class LabadoMessengerSdk {
       });
     });
 
-    return data;
+    return data as R[];
   }
 
   protected getAuthOptions(

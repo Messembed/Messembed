@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { GraphqlApiResolver } from './graphql-api.resolver';
+import { ChatsQueryResolver } from './chats.query.resolver';
 
-describe('GraphqlApiResolver', () => {
-  let resolver: GraphqlApiResolver;
+describe('ChatsQueryResolver', () => {
+  let resolver: ChatsQueryResolver;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [GraphqlApiResolver],
+      providers: [ChatsQueryResolver],
     }).compile();
 
-    resolver = module.get<GraphqlApiResolver>(GraphqlApiResolver);
+    resolver = module.get<ChatsQueryResolver>(ChatsQueryResolver);
   });
 
   it('should be defined', () => {

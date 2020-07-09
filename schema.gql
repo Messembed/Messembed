@@ -57,4 +57,13 @@ type Query {
 
 type Mutation {
   createAccessToken(userId: ID!): AccessTokenGraphQLType!
+  createChat(data: CreateChatGqlInput!): ChatGqlType!
+}
+
+input CreateChatGqlInput {
+  title: String!
+  externalMetadata: JSON
+  privateExternalMetadata: JSON
+  firstCompanionId: String!
+  secondCompanionId: String!
 }
