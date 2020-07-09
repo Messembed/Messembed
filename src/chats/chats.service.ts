@@ -18,7 +18,10 @@ export class ChatsService {
   ) {}
 
   async createChat(createDto: CreateChatDto): Promise<Chat> {
-    const chat = new Chat(createDto);
+    const chat = new Chat({
+      ...createDto,
+      active: true,
+    });
 
     await this.chatsRepo.save(chat);
 
