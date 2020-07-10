@@ -85,6 +85,12 @@ export class LabadoMessengerSdk {
     return this.parseDates<any, User>([data], DATE_FIELDS)[0];
   }
 
+  async getMe(creds: LabadoMessengerUserCreds | string): Promise<User> {
+    const { data } = await this.axios.get(`user`, this.getAuthOptions(creds));
+
+    return this.parseDates<any, User>([data], DATE_FIELDS)[0];
+  }
+
   protected parseDates<T extends Record<string, any>, R = T>(
     data: T[],
     dateFields: readonly string[],
