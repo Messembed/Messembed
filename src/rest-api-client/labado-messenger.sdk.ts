@@ -8,6 +8,8 @@ import _ from 'lodash';
 import { Chat } from './interfaces/chat.interface';
 import { PersonalChat } from './interfaces/personal-chat.interface';
 import { CreateChatData } from './interfaces/create-chat-data.interface';
+import { CreateUserData } from './interfaces/create-user-data.interface';
+import { User } from './interfaces/user.interface';
 
 const DATE_FIELDS = ['createdAt', 'updatedAt', 'deletedAt'] as const;
 
@@ -16,14 +18,6 @@ export class LabadoMessengerSdk {
 
   constructor(baseURL: string) {
     this.axios = axios.create({ baseURL });
-    this.axios.interceptors.response.use(
-      response => {
-        return response;
-      },
-      error => {
-        return error;
-      },
-    );
   }
 
   async getAllChats(
@@ -76,6 +70,19 @@ export class LabadoMessengerSdk {
     );
 
     return this.parseDates<any, Chat>([data], DATE_FIELDS)[0];
+  }
+
+  async createUser(
+    createData: CreateUserData,
+    creds: LabadoMessengerExtSerCreds | string,
+  ): Promise<User> {
+    const { data } = await this.axios.post(
+      'users',
+      createData,
+      this.getAuthOptions(creds),
+    );
+
+    return this.parseDates<any, User>([data], DATE_FIELDS)[0];
   }
 
   protected parseDates<T extends Record<string, any>, R = T>(

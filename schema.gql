@@ -48,6 +48,15 @@ type PersonalChatGqlType {
   unreadMessagesCount: Int!
 }
 
+type UserGqlType {
+  id: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  deletedAt: DateTime
+  externalMetadata: JSON
+  privateExternalMetadata: JSON
+}
+
 type Query {
   ping: String!
   chatsConnection: ChatsConnectionGqlType!
@@ -58,6 +67,7 @@ type Query {
 type Mutation {
   createAccessToken(userId: ID!): AccessTokenGraphQLType!
   createChat(data: CreateChatGqlInput!): ChatGqlType!
+  createUser(data: CreateUserGqlInput!): UserGqlType!
 }
 
 input CreateChatGqlInput {
@@ -66,4 +76,10 @@ input CreateChatGqlInput {
   privateExternalMetadata: JSON
   firstCompanionId: String!
   secondCompanionId: String!
+}
+
+input CreateUserGqlInput {
+  id: String!
+  externalMetadata: JSON!
+  privateExternalMetadata: JSON!
 }
