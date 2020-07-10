@@ -30,7 +30,7 @@ export class LabadoMessengerSdk {
 
     const result = {
       ...data,
-      data: this.parseDates(data.data, DATE_FIELDS),
+      data: this.parseDatesOfObjects(data.data, DATE_FIELDS),
     };
 
     return result;
@@ -45,7 +45,7 @@ export class LabadoMessengerSdk {
       this.getAuthOptions(creds),
     );
 
-    return this.parseDates([data], DATE_FIELDS)[0];
+    return this.parseDatesOfObject(data, DATE_FIELDS);
   }
 
   async getPersonalChats(
@@ -56,7 +56,7 @@ export class LabadoMessengerSdk {
       this.getAuthOptions(creds),
     );
 
-    return this.parseDates(data, DATE_FIELDS);
+    return this.parseDatesOfObjects(data, DATE_FIELDS);
   }
 
   async createChat(
@@ -69,7 +69,7 @@ export class LabadoMessengerSdk {
       this.getAuthOptions(creds),
     );
 
-    return this.parseDates<any, Chat>([data], DATE_FIELDS)[0];
+    return this.parseDatesOfObject<any, Chat>(data, DATE_FIELDS);
   }
 
   async createUser(
@@ -82,27 +82,36 @@ export class LabadoMessengerSdk {
       this.getAuthOptions(creds),
     );
 
-    return this.parseDates<any, User>([data], DATE_FIELDS)[0];
+    return this.parseDatesOfObject<any, User>(data, DATE_FIELDS);
   }
 
   async getMe(creds: LabadoMessengerUserCreds | string): Promise<User> {
     const { data } = await this.axios.get(`user`, this.getAuthOptions(creds));
 
-    return this.parseDates<any, User>([data], DATE_FIELDS)[0];
+    return this.parseDatesOfObject<any, User>(data, DATE_FIELDS);
   }
 
-  protected parseDates<T extends Record<string, any>, R = T>(
-    data: T[],
+  protected parseDatesOfObjects<T extends Record<string, any>, R = T>(
+    objects: T[],
     dateFields: readonly string[],
   ): R[] {
-    data.map(obj => {
-      dateFields.forEach(dateField => {
-        const date = _.get(obj, dateField);
-        _.set(obj, dateField, date && new Date(date));
-      });
+    objects.forEach(obj => {
+      this.parseDatesOfObject<T, R>(obj, dateFields);
     });
 
-    return data as R[];
+    return objects as R[];
+  }
+
+  protected parseDatesOfObject<T extends Record<string, any>, R = T>(
+    obj: T,
+    dateFields: readonly string[],
+  ): R {
+    dateFields.forEach(dateField => {
+      const date = _.get(obj, dateField);
+      _.set(obj, dateField, date && new Date(date));
+    });
+
+    return obj as R;
   }
 
   protected getAuthOptions(
