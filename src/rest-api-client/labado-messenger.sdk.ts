@@ -10,8 +10,13 @@ import { PersonalChat } from './interfaces/personal-chat.interface';
 import { CreateChatData } from './interfaces/create-chat-data.interface';
 import { CreateUserData } from './interfaces/create-user-data.interface';
 import { User } from './interfaces/user.interface';
+import { CreateMessageData } from './interfaces/create-message-data.interface';
+import { Message } from './interfaces/message.interface';
+import { FindMessagesResult } from './interfaces/find-messages-result.interface';
+import { FindMessagesData } from './interfaces/find-messages-data.interface';
 
 const DATE_FIELDS = ['createdAt', 'updatedAt', 'deletedAt'] as const;
+const MESSAGE_DATE_FIELDS = [...DATE_FIELDS, 'readAt'] as const;
 
 export class LabadoMessengerSdk {
   protected axios: AxiosInstance;
@@ -89,6 +94,41 @@ export class LabadoMessengerSdk {
     const { data } = await this.axios.get(`user`, this.getAuthOptions(creds));
 
     return this.parseDatesOfObject<any, User>(data, DATE_FIELDS);
+  }
+
+  async createMessage(
+    createData: CreateMessageData,
+    creds: LabadoMessengerUserCreds | string,
+  ): Promise<Message> {
+    const { chatId, ...requestBody } = createData;
+
+    const { data } = await this.axios.post(
+      `chats/${chatId}/messages`,
+      requestBody,
+      this.getAuthOptions(creds),
+    );
+
+    return this.parseDatesOfObject<any, Message>(data, MESSAGE_DATE_FIELDS);
+  }
+
+  async findMessages(
+    findData: FindMessagesData,
+    creds: LabadoMessengerUserCreds | LabadoMessengerExtSerCreds | string,
+  ): Promise<FindMessagesResult> {
+    const { chatId, ...queryParams } = findData;
+
+    const { data } = await this.axios.get(`chats/${chatId}/messages`, {
+      ...this.getAuthOptions(creds),
+      params: queryParams,
+    });
+
+    return {
+      ...data,
+      messages: this.parseDatesOfObjects<any, Message>(
+        data.messages,
+        MESSAGE_DATE_FIELDS,
+      ),
+    };
   }
 
   protected parseDatesOfObjects<T extends Record<string, any>, R = T>(

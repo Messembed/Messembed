@@ -24,7 +24,7 @@ export class PersonalChatGqlType {
   @Field(() => GraphQLJSON, { nullable: true })
   externalMetadata?: Record<string, unknown> | null;
 
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   lastMessageId: number;
 
   // lastMessage: Message;
