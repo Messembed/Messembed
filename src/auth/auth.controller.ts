@@ -7,12 +7,21 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  Get,
 } from '@nestjs/common';
-import { ApiTags, ApiCreatedResponse, ApiBasicAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiCreatedResponse,
+  ApiBasicAuth,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
 import { AccessTokenDto } from './dto/access-token.dto';
 import { AuthService } from './auth.service';
 import { ExternalServiceAuthGuard } from './guards/external-service-auth.guard';
 import { UserPathDto } from '../users/dto/user-path.dto';
+import { CookiesAuthGuard } from './guards/cookies-auth.guard';
+import { AuthData } from './decorators/auth-data.decorator';
+import { RequestAuthData } from './classes/request-auth-data.class';
 
 @Controller()
 @ApiTags('Auth')
@@ -34,5 +43,12 @@ export class AuthController {
     @Param() { userId }: UserPathDto,
   ): Promise<AccessTokenDto> {
     return this.authService.createAccessTokenByUserId(userId);
+  }
+
+  @Get('cookies-test')
+  @UseGuards(CookiesAuthGuard)
+  @ApiCookieAuth()
+  async testCookies(@AuthData() authData: RequestAuthData): Promise<any> {
+    return authData;
   }
 }

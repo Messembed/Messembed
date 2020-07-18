@@ -2,11 +2,8 @@ import { PassportStrategy } from '@nestjs/passport';
 import { BasicStrategy } from 'passport-http';
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { RequestAuthData } from '../classes/request-auth-data.class';
-import {
-  EXTERNAL_SERVICE_CONFIG_KEY,
-  ExternalServiceConfigType,
-} from '../../config/external-service.config';
 import secureCompare from 'secure-compare';
+import { AuthConfigType, AUTH_CONFIG_KEY } from '../../config/auth.config';
 
 @Injectable()
 export class ExternalServiceBasicStrategy extends PassportStrategy(
@@ -14,14 +11,14 @@ export class ExternalServiceBasicStrategy extends PassportStrategy(
   'external-service-basic',
 ) {
   constructor(
-    @Inject(EXTERNAL_SERVICE_CONFIG_KEY)
-    private readonly externalServiceConfig: ExternalServiceConfigType,
+    @Inject(AUTH_CONFIG_KEY)
+    private readonly authConfig: AuthConfigType,
   ) {
     super();
   }
 
   async validate(username: string, password: string): Promise<RequestAuthData> {
-    if (!secureCompare(password, this.externalServiceConfig.password)) {
+    if (!secureCompare(password, this.authConfig.externalService.password)) {
       throw new UnauthorizedException();
     }
 
