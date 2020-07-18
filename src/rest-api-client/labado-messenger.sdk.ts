@@ -14,6 +14,7 @@ import { CreateMessageData } from './interfaces/create-message-data.interface';
 import { Message } from './interfaces/message.interface';
 import { FindMessagesResult } from './interfaces/find-messages-result.interface';
 import { FindMessagesData } from './interfaces/find-messages-data.interface';
+import { AccessToken } from './interfaces/access-token.interface';
 
 const DATE_FIELDS = ['createdAt', 'updatedAt', 'deletedAt'] as const;
 const MESSAGE_DATE_FIELDS = [...DATE_FIELDS, 'readAt'] as const;
@@ -23,6 +24,19 @@ export class LabadoMessengerSdk {
 
   constructor(baseURL: string) {
     this.axios = axios.create({ baseURL });
+  }
+
+  async createAccessToken(
+    userId: string | number,
+    creds: LabadoMessengerExtSerCreds | string,
+  ): Promise<AccessToken> {
+    const { data } = await this.axios.post<AccessToken>(
+      `users/${userId}/access-tokens`,
+      undefined,
+      this.getAuthOptions(creds),
+    );
+
+    return data;
   }
 
   async getAllChats(

@@ -6,10 +6,12 @@ import { UsersMutationResolver } from './users/users.mutation.resolver';
 import { UsersQueryResolver } from './users/users.query.resolver';
 import { MessagesMutationResolver } from './messages/messages.mutation.resolver';
 import { MessagesQueryResolver } from './messages/messages.query.resolver';
+import { AuthMutationResolver } from './auth/auth.mutation.resolver';
 
 @Module({
   imports: [RestApiClientModule],
   providers: [
+    AuthMutationResolver,
     ChatsQueryResolver,
     ChatsMutationResolver,
     UsersQueryResolver,

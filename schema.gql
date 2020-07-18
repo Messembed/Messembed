@@ -2,11 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type AccessTokenGraphQLType {
-  """Access token"""
-  accessToken: String!
-}
-
 type ChatGqlType {
   id: ID!
   createdAt: DateTime!
@@ -79,6 +74,10 @@ type MessagesConnectionGqlType {
   messages: [MessageGqlType!]!
 }
 
+type AccessTokenGqlType {
+  accessToken: String!
+}
+
 type Query {
   ping: String!
   chatsConnection: ChatsConnectionGqlType!
@@ -97,10 +96,10 @@ input MessagesFiltersGqlInput {
 }
 
 type Mutation {
-  createAccessToken(userId: ID!): AccessTokenGraphQLType!
   createChat(data: CreateChatGqlInput!): ChatGqlType!
   createUser(data: CreateUserGqlInput!): UserGqlType!
   createMessage(data: CreateMessageGqlInput!): MessageGqlType!
+  createAccessToken(userId: ID!): AccessTokenGqlType!
 }
 
 input CreateChatGqlInput {

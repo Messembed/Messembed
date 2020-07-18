@@ -6,7 +6,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ExternalServiceBasicStrategy } from './strategies/external-service-basic.strategy';
-import { AuthResolver } from './auth.resolver';
 import { CookiesStrategy } from './strategies/cookies.strategy';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../config/auth.config';
 
@@ -25,7 +24,6 @@ import { AuthConfigType, AUTH_CONFIG_KEY } from '../config/auth.config';
     JwtStrategy,
     ExternalServiceBasicStrategy,
     CookiesStrategy,
-    AuthResolver,
   ],
   controllers: [AuthController],
 })
