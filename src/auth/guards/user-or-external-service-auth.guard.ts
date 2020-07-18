@@ -1,6 +1,6 @@
 import { AuthGuard } from '@nestjs/passport';
 
-export const JwtOrExternalServiceAuthGuard = AuthGuard([
+export const UserOrExternalServiceAuthGuard = AuthGuard([
   'jwt',
   'external-service-basic',
 ]);

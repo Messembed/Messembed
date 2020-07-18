@@ -18,7 +18,7 @@ import { ChatPathDto } from '../chats/dto/chat-path.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
 import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
-import { JwtOrExternalServiceAuthGuard } from '../auth/guards/jwt-or-external-service-auth.guard';
+import { UserOrExternalServiceAuthGuard } from '../auth/guards/user-or-external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ExtendedValidationPipe } from '../common/pipes/extended-validation.pipe';
@@ -45,7 +45,7 @@ export class MessagesController {
       ],
     ),
   )
-  @UseGuards(JwtOrExternalServiceAuthGuard)
+  @UseGuards(UserOrExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => Message })
   async createMessage(
     @Param() { chatId }: ChatPathDto,
@@ -60,7 +60,7 @@ export class MessagesController {
   }
 
   @Get('chats/:chatId/messages')
-  @UseGuards(JwtOrExternalServiceAuthGuard)
+  @UseGuards(UserOrExternalServiceAuthGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
