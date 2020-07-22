@@ -19,7 +19,7 @@ import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserAuthGuard } from '../auth/guards/user-auth.guard';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -58,7 +58,7 @@ export class UsersController {
   }
 
   @Get('user')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => User })
   async getMe(@AuthData() authData: RequestAuthData): Promise<User> {
     return this.usersService.getUser(authData.user.id);

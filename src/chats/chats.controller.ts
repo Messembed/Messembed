@@ -23,8 +23,8 @@ import { PersonalChatDto } from './dto/personal-chat.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatsQueryDto } from './dto/chats-query.dto';
+import { UserAuthGuard } from '../auth/guards/user-auth.guard';
 
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -70,7 +70,7 @@ export class ChatsController {
   }
 
   @Get('user/personal-chats')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
   async getPersonalChats(
     @Query() query: ChatsQueryDto,
@@ -80,7 +80,7 @@ export class ChatsController {
   }
 
   @Get('user/personal-chats/:chatId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto })
   async getPersonalChat(
     @Param() { chatId }: ChatPathDto,
@@ -93,7 +93,7 @@ export class ChatsController {
   }
 
   @Post('user/personal-chats/:chatId/read-status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto })
   async setRead(
     @Param() { chatId }: ChatPathDto,

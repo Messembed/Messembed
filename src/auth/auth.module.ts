@@ -8,9 +8,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ExternalServiceBasicStrategy } from './strategies/external-service-basic.strategy';
 import { CookiesStrategy } from './strategies/cookies.strategy';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../config/auth.config';
+import { ExternalServiceModule } from '../external-service/external-service.module';
 
 @Module({
   imports: [
+    ExternalServiceModule,
     TypeOrmModule.forFeature([UsersRepository]),
     JwtModule.registerAsync({
       useFactory: (authConfig: AuthConfigType) => ({

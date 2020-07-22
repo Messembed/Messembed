@@ -11,6 +11,11 @@ export const configModuleOptions: ConfigModuleOptions = {
       .required(),
     HOST: Joi.string().required(),
     APP_URL: Joi.string().required(),
+
+    EXTERNAL_SERVICE_CALLBACK_URL: Joi.string()
+      .uri()
+      .required(),
+
     AUTH__EXTERNAL_SERVICE__PASSWORD: Joi.string().optional(),
     AUTH__COOKIES_STRATEGY__VERIFY_URL: Joi.string().optional(),
     AUTH__JWT_STRATEGY__JWT_SECRET: Joi.string().optional(),
