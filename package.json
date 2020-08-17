@@ -7,6 +7,10 @@
     "email": "starguitar307@gmail.com",
     "url": "https://github.com/Edgar-P-yan"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Edgar-P-yan/google-it-telegram-bot.git"
+  },
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
