@@ -1,8 +1,12 @@
 {
-  "name": "labado-messenger",
+  "name": "messembed",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": {
+    "name": "Edgar Poghosyan",
+    "email": "starguitar307@gmail.com",
+    "url": "https://github.com/Edgar-P-yan"
+  },
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

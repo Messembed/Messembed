@@ -1,1 +1,1 @@
-# 💬 Labado Messenger - Chat API & Messaging SDK (WIP)
+# 💬 Messembed - Chat API & Messaging SDK (WIP)
