@@ -2,6 +2,7 @@ import { ConfigModuleOptions } from '@nestjs/config/dist/interfaces';
 import { appConfig } from './app.config';
 import Joi from '@hapi/joi';
 import { authConfig } from './auth.config';
+import { mongodbConfig } from './mongodb.config';
 
 export const configModuleOptions: ConfigModuleOptions = {
   isGlobal: true,
@@ -19,6 +20,8 @@ export const configModuleOptions: ConfigModuleOptions = {
     AUTH__EXTERNAL_SERVICE__PASSWORD: Joi.string().optional(),
     AUTH__COOKIES_STRATEGY__VERIFY_URL: Joi.string().optional(),
     AUTH__JWT_STRATEGY__JWT_SECRET: Joi.string().optional(),
+
+    MONGODB_URI: Joi.string().uri().required(),
   }),
-  load: [appConfig, authConfig],
+  load: [appConfig, authConfig, mongodbConfig],
 };
