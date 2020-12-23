@@ -4,10 +4,10 @@ import {
   Body,
   Param,
   Get,
-  Put,
   ClassSerializerInterceptor,
   UseInterceptors,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
@@ -15,14 +15,13 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserPathDto } from './dto/user-path.dto';
 import { EditUserDto } from './dto/edit-user.dto';
-import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { UserAuthGuard } from '../auth/guards/user-auth.guard';
+import { PaginatedUserInMongoDto } from './dto/paginated-user-in-mongo.dto';
 
 @Controller()
-@UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -30,37 +29,39 @@ export class UsersController {
   @Post('users')
   @UseGuards(ExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => User })
-  async createUser(@Body() createDto: CreateUserDto): Promise<User> {
-    return this.usersService.createUser(createDto);
+  async createUser(@Body() createDto: CreateUserDto): Promise<any> {
+    return (await this.usersService.createUserInMongo(createDto)).toJSON();
   }
 
   @Get('users/:userId')
   @ApiOkResponse({ type: () => User })
-  async getUser(@Param() { userId }: UserPathDto): Promise<User> {
-    return this.usersService.getUser(userId);
+  async getUser(@Param() { userId }: UserPathDto): Promise<any> {
+    return (await this.usersService.getUserFromMongo(userId)).toJSON();
   }
 
-  @Put('users/:userId')
+  @Patch('users/:userId')
   @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => User })
   async editUser(
     @Param() { userId }: UserPathDto,
     @Body() editDto: EditUserDto,
-  ): Promise<User> {
-    return this.usersService.editUser(userId, editDto);
+  ): Promise<any> {
+    return (await this.usersService.editUserInMongo(userId, editDto)).toJSON();
   }
 
   @Get('users')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => PaginatedUsersDto })
-  async findUsers(): Promise<PaginatedUsersDto> {
-    return this.usersService.findAllUsers();
+  @ApiOkResponse({ type: () => PaginatedUserInMongoDto })
+  async findUsers(): Promise<PaginatedUserInMongoDto> {
+    return this.usersService.findAllUsersFromMongo();
   }
 
   @Get('user')
   @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => User })
-  async getMe(@AuthData() authData: RequestAuthData): Promise<User> {
-    return this.usersService.getUser(authData.user.id);
+  async getMe(@AuthData() authData: RequestAuthData): Promise<any> {
+    return (
+      await this.usersService.getUserFromMongo(authData.user.id)
+    ).toJSON();
   }
 }

@@ -6,4 +6,6 @@ export const errors = {
   NOT_FOUND: HttpStatus.NOT_FOUND,
 
   UNAUTHORIZED: HttpStatus.UNAUTHORIZED,
+
+  USER_ID_IS_NOT_UNIQUE: HttpStatus.CONFLICT,
 };
