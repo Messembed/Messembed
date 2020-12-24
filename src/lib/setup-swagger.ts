@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export function setupSwagger(app: INestApplication): void {
   const options = new DocumentBuilder()
-    .setTitle('Labado Messenger')
+    .setTitle('Messembed')
     .setVersion('1.0')
     .addServer('http://localhost:3000', 'Local development server')
     .build();

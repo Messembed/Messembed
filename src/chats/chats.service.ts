@@ -8,6 +8,12 @@ import { PersonalChatDto } from './dto/personal-chat.dto';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { MessagesService } from '../messages/messages.service';
 import { ChatsQueryDto } from './dto/chats-query.dto';
+import { Model } from 'mongoose';
+import { ChatMongo, ChatMongoDocument } from './schemas/chat.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { UsersService } from '../users/users.service';
+import { ErrorGenerator } from '../common/classes/error-generator.class';
+import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 
 @Injectable()
 export class ChatsService {
@@ -15,6 +21,9 @@ export class ChatsService {
     private readonly chatsRepo: ChatsRepository,
     @Inject(forwardRef(() => MessagesService))
     private readonly messagesService: MessagesService,
+    @InjectModel(ChatMongo.name)
+    private readonly chatModel: Model<ChatMongoDocument>,
+    private readonly usersService: UsersService,
   ) {}
 
   async createChat(createDto: CreateChatDto): Promise<Chat> {
@@ -28,6 +37,33 @@ export class ChatsService {
     return chat;
   }
 
+  async createChatInMongo(
+    createDto: CreateChatDto,
+  ): Promise<ChatMongoDocument> {
+    const firstCompanion = await this.usersService.getUserFromMongo(
+      createDto.firstCompanionId,
+    );
+    const secondCompanion = await this.usersService.getUserFromMongo(
+      createDto.secondCompanionId,
+    );
+
+    createDto.title = createDto.title;
+    createDto.externalMetadata = createDto.externalMetadata;
+    createDto.privateExternalMetadata = createDto.privateExternalMetadata;
+
+    const chat = await this.chatModel.create({
+      createdAt: new Date(),
+      active: true,
+      firstCompanion: firstCompanion.toJSON(),
+      secondCompanion: secondCompanion.toJSON(),
+      title: createDto.title,
+      externalMetadata: createDto.externalMetadata,
+      privateExternalMetadata: createDto.privateExternalMetadata,
+    });
+
+    return chat;
+  }
+
   async editChat(chatId: number | string, editDto: EditChatDto): Promise<Chat> {
     const chat = await this.chatsRepo.findOneOrFailHttp(chatId);
 
@@ -37,14 +73,46 @@ export class ChatsService {
     return chat;
   }
 
+  async editChatInMongo(
+    chatId: string,
+    editDto: EditChatDto,
+  ): Promise<ChatMongoDocument> {
+    const chat = await this.getChatFromMongoOrFailHttp(chatId);
+
+    chat.title = editDto.title;
+    chat.externalMetadata = editDto.externalMetadata;
+    chat.privateExternalMetadata = editDto.privateExternalMetadata;
+
+    await chat.save();
+
+    return chat;
+  }
+
   async getChat(chatId: number): Promise<Chat> {
     return this.chatsRepo.findOneOrFailHttp(chatId);
+  }
+
+  async getChatFromMongoOrFailHttp(chatId: string): Promise<ChatMongoDocument> {
+    const chat = await this.chatModel.findOne({ _id: chatId, deletedAt: null });
+
+    if (!chat) {
+      throw ErrorGenerator.create('CHAT_NOT_FOUND');
+    }
+
+    return chat;
   }
 
   async getAllChats(): Promise<PaginatedChatsDto> {
     const [chats, totalCount] = await this.chatsRepo.findAndCount();
 
     return new PaginatedChatsDto(chats, totalCount);
+  }
+
+  async getAllChatsFromMongo(): Promise<PaginatedChatsInMongoDto> {
+    const chats = await this.chatModel.find({ deletedAt: null });
+    const totalCount = await this.chatModel.count({ deletedAt: null });
+
+    return new PaginatedChatsInMongoDto(chats, totalCount);
   }
 
   /**
