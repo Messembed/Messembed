@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { EditUserDto } from './dto/edit-user.dto';
 import { PaginatedUsersDto } from './dto/paginated-users.dto';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UserMongo, UserMongoDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
@@ -106,5 +106,16 @@ export class UsersService {
     const totalCount = await this.userModel.count({ deletedAt: null });
 
     return new PaginatedUserInMongoDto(users, totalCount);
+  }
+
+  async findOneUserFromMongoOrFail(
+    userId: string | Types.ObjectId,
+  ): Promise<UserMongoDocument> {
+    const user = await this.userModel.findOne({ _id: userId });
+    if (!user) {
+      throw new Error(`User not found with id ${userId}`);
+    }
+
+    return user;
   }
 }

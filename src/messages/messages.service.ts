@@ -1,6 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { MessagesRepository } from './repositories/messages.repository';
 import { CreateMessageOptions } from './interfaces/create-message-options.interface';
+import { CreateMessageInMongoOptions } from './interfaces/create-message-in-mongo-options.interface';
 import { Message } from './entities/message.entity';
 import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
 import _ from 'lodash';
@@ -11,6 +12,12 @@ import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatsService } from '../chats/chats.service';
 import { UnreadMessagesCountPerChat } from './interfaces/unread-messages-count-per-chat.interface';
+import { MessageMongo, MessageMongoDocument } from './schemas/message.schema';
+import { Model, Types } from 'mongoose';
+import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
+import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
+import { Condition } from 'mongodb';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class MessagesService {
@@ -19,6 +26,8 @@ export class MessagesService {
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
     private readonly chatsRepo: ChatsRepository,
+    @InjectModel(MessageMongo.name)
+    private readonly messageModel: Model<MessageMongoDocument>,
   ) {}
 
   @Transactional()
@@ -41,6 +50,31 @@ export class MessagesService {
     return msg;
   }
 
+  async createMessageInMongo(
+    options: CreateMessageInMongoOptions,
+  ): Promise<MessageMongoDocument> {
+    await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
+      options.chatId,
+      options.userId,
+    );
+
+    const message = await this.messageModel.create({
+      createdAt: new Date(),
+      chat: options.chatId,
+      user: options.userId,
+      content: options.content,
+      read: false,
+      externalMetadata: options.externalMetadata,
+      privateExternalMetadata: options.privateExternalMetadata,
+    });
+
+    // TODO: read messages of companion
+
+    await this.chatsService.setLastMessageOfChat(options.chatId, message);
+
+    return message;
+  }
+
   async getPaginatedMessagesConsideringAccessRights(
     authData: RequestAuthData,
     chatId: number,
@@ -54,6 +88,19 @@ export class MessagesService {
     return this.getPaginatedMessages(chat.id, filters);
   }
 
+  async getPaginatedMessagesFromMongoConsideringAccessRights(
+    authData: RequestAuthData,
+    chatId: Types.ObjectId,
+    filters?: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesFromMongoDto> {
+    const chat = await this.chatsService.getChatFromMongoConsideringAccessRights(
+      chatId,
+      authData,
+    );
+
+    return this.getPaginatedMessagesFromMongo(chat._id, filters);
+  }
+
   async getPaginatedMessages(
     chatId: number,
     filters?: GetMessagesFiltersDto,
@@ -61,6 +108,18 @@ export class MessagesService {
     const messages = await this.getMessages(chatId, filters);
 
     return new PaginatedMessagesDto({
+      ...filters,
+      messages,
+    });
+  }
+
+  async getPaginatedMessagesFromMongo(
+    chatId: Types.ObjectId,
+    filters?: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesFromMongoDto> {
+    const messages = await this.getMessagesFromMongo(chatId, filters);
+
+    return new PaginatedMessagesFromMongoDto({
       ...filters,
       messages,
     });
@@ -87,6 +146,36 @@ export class MessagesService {
       skip: filters?.offset || undefined,
       take: filters?.limit || undefined,
     });
+
+    return messages;
+  }
+
+  async getMessagesFromMongo(
+    chatId: Types.ObjectId,
+    filters?: GetMessagesFromMongoFiltersDto,
+  ): Promise<MessageMongoDocument[]> {
+    const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)
+      ? { $gte: filters?.after }
+      : !_.isNil(filters?.before)
+      ? { $lt: filters?.before }
+      : undefined;
+
+    const messagesQuery = this.messageModel
+      .find({
+        chat: chatId,
+        ...(createdAtCondition ? { createdAt: createdAtCondition } : {}),
+      })
+      .sort({ createdAt: 'ASC' });
+
+    if (filters?.offset) {
+      messagesQuery.skip(filters?.offset);
+    }
+
+    if (filters?.limit) {
+      messagesQuery.limit(filters?.limit);
+    }
+
+    const messages = await messagesQuery.exec();
 
     return messages;
   }

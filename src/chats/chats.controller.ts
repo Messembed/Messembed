@@ -27,6 +27,7 @@ import { ChatsQueryDto } from './dto/chats-query.dto';
 import { UserAuthGuard } from '../auth/guards/user-auth.guard';
 import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
 import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
+import { Types } from 'mongoose';
 
 @Controller()
 @ApiTags('Chat')
@@ -53,7 +54,12 @@ export class ChatsController {
     @Param() { chatId }: ChatPathForMongoDto,
     @Body() editDto: EditChatDto,
   ): Promise<any> {
-    return (await this.chatsService.editChatInMongo(chatId, editDto)).toJSON();
+    return (
+      await this.chatsService.editChatInMongo(
+        new Types.ObjectId(chatId),
+        editDto,
+      )
+    ).toJSON();
   }
 
   @Get('chats/:chatId')
@@ -61,7 +67,9 @@ export class ChatsController {
   @ApiOkResponse({ type: () => Chat })
   async getChat(@Param() { chatId }: ChatPathForMongoDto): Promise<any> {
     return (
-      await this.chatsService.getChatFromMongoOrFailHttp(chatId)
+      await this.chatsService.getChatFromMongoOrFailHttp(
+        new Types.ObjectId(chatId),
+      )
     ).toJSON();
   }
 

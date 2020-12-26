@@ -9,6 +9,7 @@ import { ExternalServiceBasicStrategy } from './strategies/external-service-basi
 import { CookiesStrategy } from './strategies/cookies.strategy';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../config/auth.config';
 import { ExternalServiceModule } from '../external-service/external-service.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ExternalServiceModule } from '../external-service/external-service.modu
       }),
       inject: [AUTH_CONFIG_KEY],
     }),
+    UsersModule,
   ],
   providers: [
     AuthService,

@@ -8,12 +8,14 @@ import { PersonalChatDto } from './dto/personal-chat.dto';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { MessagesService } from '../messages/messages.service';
 import { ChatsQueryDto } from './dto/chats-query.dto';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ChatMongo, ChatMongoDocument } from './schemas/chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '../users/users.service';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
 import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
+import { MessageMongoDocument } from '../messages/schemas/message.schema';
+import { UserMongoDocument } from '../users/schemas/user.schema';
 
 @Injectable()
 export class ChatsService {
@@ -74,7 +76,7 @@ export class ChatsService {
   }
 
   async editChatInMongo(
-    chatId: string,
+    chatId: Types.ObjectId,
     editDto: EditChatDto,
   ): Promise<ChatMongoDocument> {
     const chat = await this.getChatFromMongoOrFailHttp(chatId);
@@ -92,7 +94,9 @@ export class ChatsService {
     return this.chatsRepo.findOneOrFailHttp(chatId);
   }
 
-  async getChatFromMongoOrFailHttp(chatId: string): Promise<ChatMongoDocument> {
+  async getChatFromMongoOrFailHttp(
+    chatId: Types.ObjectId,
+  ): Promise<ChatMongoDocument> {
     const chat = await this.chatModel.findOne({ _id: chatId, deletedAt: null });
 
     if (!chat) {
@@ -211,6 +215,33 @@ export class ChatsService {
   }
 
   /**
+   * Находит чат по его идентификатору.
+   * Так же проверяет права доступа к этому
+   * чату учитывая переданный RequestAuthData.
+   * Если нет чата с таким идентификатором, или
+   * данный клиент не имеет права доступа к этому чату,
+   * то выбрасывается ошибка HttpException.
+   *
+   * Данный клиент имеет права доступа к этому чату
+   * если он:
+   * 1. является external service-ом, или;
+   * 2. является участником чата.
+   */
+  async getChatFromMongoConsideringAccessRights(
+    chatId: Types.ObjectId,
+    authData: RequestAuthData,
+  ): Promise<ChatMongoDocument> {
+    const chat = authData.isExternalService
+      ? await this.getChatFromMongoOrFailHttp(chatId)
+      : await this.findChatByIdAndCompanionInMongoOrFailHttp(
+          chatId,
+          (authData.user as UserMongoDocument)._id,
+        );
+
+    return chat;
+  }
+
+  /**
    * Находит чат по его идентификатору и по идентификатору
    * одного из собеседников в этом чате. Если не находит,
    * то выбрасывает HttpException
@@ -234,6 +265,35 @@ export class ChatsService {
   }
 
   /**
+   * Находит чат по его идентификатору и по идентификатору
+   * одного из собеседников в этом чате. Если не находит,
+   * то выбрасывает HttpException
+   */
+  async findChatByIdAndCompanionInMongoOrFailHttp(
+    chatId: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<ChatMongoDocument> {
+    const chat = await this.chatModel.findOne({
+      $or: [
+        {
+          _id: chatId,
+          'firstCompanion._id': userId,
+        },
+        {
+          _id: chatId,
+          'secondCompanion._id': userId,
+        },
+      ],
+    });
+
+    if (!chat) {
+      throw ErrorGenerator.create('CHAT_NOT_FOUND');
+    }
+
+    return chat;
+  }
+
+  /**
    * По функционалу эта функция то же самое, что
    * и MessagesService#readMessagesAsUser, с единственным
    * отличием - она возвращает PersonalChat
@@ -245,5 +305,17 @@ export class ChatsService {
     await this.messagesService.readMessagesAsUser(chatId, userId);
 
     return this.getPersonalChatOfUserOrFailHttp(userId, chatId);
+  }
+
+  async setLastMessageOfChat(
+    chatId: Types.ObjectId,
+    lastMessage: MessageMongoDocument,
+  ): Promise<void> {
+    const result = await this.chatModel.updateOne(
+      { _id: chatId },
+      { lastMessage: lastMessage.toJSON() },
+    );
+
+    console.log(result);
   }
 }

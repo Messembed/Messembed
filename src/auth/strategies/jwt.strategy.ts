@@ -5,13 +5,14 @@ import { JwtAuthTokenPayload } from '../interfaces/jwt-auth-token-payload.interf
 import { RequestAuthData } from '../classes/request-auth-data.class';
 import { UsersRepository } from '../../users/repositories/users.repository';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../../config/auth.config';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @Inject(AUTH_CONFIG_KEY)
     authConfig: AuthConfigType,
-    private readonly usersRepo: UsersRepository,
+    private readonly usersService: UsersService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -21,7 +22,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtAuthTokenPayload): Promise<RequestAuthData> {
-    const user = await this.usersRepo.findOneOrFail(payload.sub);
+    const user = await this.usersService.findOneUserFromMongoOrFail(
+      payload.sub,
+    );
 
     return new RequestAuthData({
       user,

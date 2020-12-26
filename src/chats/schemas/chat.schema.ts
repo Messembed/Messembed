@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Message } from '../../messages/entities/message.entity';
+import { MessageMongo } from '../../messages/schemas/message.schema';
 import { UserMongo, UserMongoSchema } from '../../users/schemas/user.schema';
 
 export type ChatMongoDocument = ChatMongo & Document;
@@ -37,7 +37,7 @@ export class ChatMongo {
   secondCompanion: UserMongo;
 
   @Prop({ type: Object })
-  lastMessage?: Message;
+  lastMessage?: MessageMongo;
 }
 
 export const ChatMongoSchema = SchemaFactory.createForClass(ChatMongo);

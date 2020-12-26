@@ -1,7 +1,8 @@
 import { User } from '../../users/entities/user.entity';
+import { UserMongoDocument } from '../../users/schemas/user.schema';
 
 export class RequestAuthData {
-  user?: User;
+  user?: User | UserMongoDocument;
   externalService?: string;
   isExternalService: boolean;
 
