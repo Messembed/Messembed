@@ -4,8 +4,6 @@ import {
   Body,
   Param,
   Get,
-  ClassSerializerInterceptor,
-  UseInterceptors,
   UseGuards,
   Patch,
 } from '@nestjs/common';
