@@ -4,8 +4,6 @@ import {
   Post,
   Param,
   Get,
-  UseInterceptors,
-  ClassSerializerInterceptor,
   Query,
   UseGuards,
   UsePipes,

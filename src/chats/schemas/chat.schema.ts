@@ -1,7 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { MessageMongo } from '../../messages/schemas/message.schema';
-import { UserMongo, UserMongoSchema } from '../../users/schemas/user.schema';
+import {
+  MessageMongoDocument,
+  MessageMongoSchema,
+} from '../../messages/schemas/message.schema';
+import {
+  UserMongoDocument,
+  UserMongoSchema,
+} from '../../users/schemas/user.schema';
 
 export type ChatMongoDocument = ChatMongo & Document;
 
@@ -31,13 +37,19 @@ export class ChatMongo {
   privateExternalMetadata?: Record<string, unknown> | null;
 
   @Prop({ type: UserMongoSchema })
-  firstCompanion: UserMongo;
+  firstCompanion: UserMongoDocument;
 
   @Prop({ type: UserMongoSchema })
-  secondCompanion: UserMongo;
+  secondCompanion: UserMongoDocument;
 
-  @Prop({ type: Object })
-  lastMessage?: MessageMongo;
+  @Prop({ type: MessageMongoSchema })
+  lastMessage?: MessageMongoDocument;
+
+  @Prop({ type: Number, default: 0 })
+  notReadByFirstCompanionMessagesCount?: number;
+
+  @Prop({ type: Number, default: 0 })
+  notReadBySecondCompanionMessagesCount?: number;
 }
 
 export const ChatMongoSchema = SchemaFactory.createForClass(ChatMongo);

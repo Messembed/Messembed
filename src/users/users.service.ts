@@ -32,6 +32,7 @@ export class UsersService {
   ): Promise<UserMongoDocument> {
     try {
       const user = await this.userModel.create({
+        _id: new Types.ObjectId(),
         externalId: createDto.id,
         createdAt: new Date(),
         updatedAt: null,
@@ -112,6 +113,17 @@ export class UsersService {
     userId: string | Types.ObjectId,
   ): Promise<UserMongoDocument> {
     const user = await this.userModel.findOne({ _id: userId });
+    if (!user) {
+      throw new Error(`User not found with id ${userId}`);
+    }
+
+    return user;
+  }
+
+  async findOneUserByExternalIdFromMongoOrFail(
+    userId: string,
+  ): Promise<UserMongoDocument> {
+    const user = await this.userModel.findOne({ externalId: userId });
     if (!user) {
       throw new Error(`User not found with id ${userId}`);
     }

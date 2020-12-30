@@ -16,6 +16,8 @@ import { ErrorGenerator } from '../common/classes/error-generator.class';
 import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 import { MessageMongoDocument } from '../messages/schemas/message.schema';
 import { UserMongoDocument } from '../users/schemas/user.schema';
+import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
+import _ from 'lodash';
 
 @Injectable()
 export class ChatsService {
@@ -56,8 +58,8 @@ export class ChatsService {
     const chat = await this.chatModel.create({
       createdAt: new Date(),
       active: true,
-      firstCompanion: firstCompanion.toJSON(),
-      secondCompanion: secondCompanion.toJSON(),
+      firstCompanion: firstCompanion,
+      secondCompanion: secondCompanion,
       title: createDto.title,
       externalMetadata: createDto.externalMetadata,
       privateExternalMetadata: createDto.privateExternalMetadata,
@@ -163,6 +165,40 @@ export class ChatsService {
   }
 
   /**
+   * Находит и возвращает чаты, в которых пользователь с данным
+   * ID является собеседником.
+   * Но, этот метод возвращает не чистых представителей класса Chat,
+   * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
+   */
+  async getPersonalChatsFromMongoOfUser(
+    userId: Types.ObjectId,
+    query?: ChatsQueryDto,
+  ): Promise<PersonalChatFromMongoDto[]> {
+    const externalMetadataFilters: Record<string, unknown> =
+      query && query.externalMetadata
+        ? _.mapKeys(
+            query.externalMetadata,
+            (value, key) => `externalMetadata.${key}`,
+          )
+        : {};
+
+    const chats = await this.chatModel.find({
+      $or: [
+        { 'firstCompanion._id': userId },
+        { 'secondCompanion._id': userId },
+      ],
+      ...externalMetadataFilters,
+    });
+
+    const personalChats = PersonalChatFromMongoDto.createFromChats(
+      chats,
+      userId,
+    );
+
+    return personalChats;
+  }
+
+  /**
    * Почти то же самое, что и ChatsService#getPersonalChatsOfUser,
    * отличие в том, что первый возвращает список, а данный метод
    * предназначен для получения одного конкретного чата.
@@ -188,6 +224,32 @@ export class ChatsService {
         chatId,
       ),
     );
+  }
+
+  /**
+   * Почти то же самое, что и ChatsService#getPersonalChatsOfUser,
+   * отличие в том, что первый возвращает список, а данный метод
+   * предназначен для получения одного конкретного чата.
+   * Если чат не найден, то выбрасывается ошибка HttpException
+   */
+  async getPersonalChatOfUserFromMongoOrFailHttp(
+    userId: Types.ObjectId,
+    chatId: Types.ObjectId,
+  ): Promise<PersonalChatFromMongoDto> {
+    const chat = await this.chatModel.findOne({
+      $or: [
+        { _id: chatId, 'firstCompanion._id': userId },
+        { _id: chatId, 'secondCompanion._id': userId },
+      ],
+    });
+
+    if (!chat) {
+      throw ErrorGenerator.create('CHAT_NOT_FOUND');
+    }
+
+    const personalChat = PersonalChatFromMongoDto.createFromChat(chat, userId);
+
+    return personalChat;
   }
 
   /**
@@ -307,15 +369,70 @@ export class ChatsService {
     return this.getPersonalChatOfUserOrFailHttp(userId, chatId);
   }
 
+  /**
+   * По функционалу эта функция то же самое, что
+   * и MessagesService#readMessagesAsUser, с единственным
+   * отличием - она возвращает PersonalChat
+   */
+  async readPersonalChatInMongoAsUser(
+    chatId: Types.ObjectId,
+    userId: Types.ObjectId,
+  ): Promise<PersonalChatFromMongoDto> {
+    const chat = await this.chatModel.findOne({
+      _id: chatId,
+      $or: [
+        { 'firstCompanion._id': userId },
+        { 'secondCompanion._id': userId },
+      ],
+    });
+
+    if (!chat) {
+      throw ErrorGenerator.create('CHAT_NOT_FOUND');
+    }
+
+    if (userId.equals(chat.firstCompanion._id)) {
+      chat.notReadByFirstCompanionMessagesCount = 0;
+    } else {
+      chat.notReadBySecondCompanionMessagesCount = 0;
+    }
+
+    await chat.save();
+
+    const personalChat = PersonalChatFromMongoDto.createFromChat(chat, userId);
+
+    return personalChat;
+  }
+
   async setLastMessageOfChat(
     chatId: Types.ObjectId,
     lastMessage: MessageMongoDocument,
   ): Promise<void> {
     const result = await this.chatModel.updateOne(
       { _id: chatId },
-      { lastMessage: lastMessage.toJSON() },
+      { lastMessage },
     );
 
     console.log(result);
+  }
+
+  async incrementNotReadMessagesCountAndReadCompanionsMessages(
+    chatId: Types.ObjectId,
+    companionNumber: 1 | 2,
+  ): Promise<void> {
+    await this.chatModel.updateOne(
+      { _id: chatId },
+      {
+        $inc: {
+          [companionNumber === 1
+            ? 'notReadBySecondCompanionMessagesCount'
+            : 'notReadByFirstCompanionMessagesCount']: 1,
+        },
+        $set: {
+          [companionNumber === 1
+            ? 'notReadByFirstCompanionMessagesCount'
+            : 'notReadBySecondCompanionMessagesCount']: 0,
+        },
+      },
+    );
   }
 }

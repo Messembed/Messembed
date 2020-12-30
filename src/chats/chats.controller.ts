@@ -16,7 +16,6 @@ import { Chat } from './entities/chat.entity';
 import { ChatsService } from './chats.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { ChatPathDto } from './dto/chat-path.dto';
 import { EditChatDto } from './dto/edit-chat.dto';
 import { PaginatedChatsDto } from './dto/paginated-chats.dto';
 import { PersonalChatDto } from './dto/personal-chat.dto';
@@ -28,6 +27,8 @@ import { UserAuthGuard } from '../auth/guards/user-auth.guard';
 import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
 import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 import { Types } from 'mongoose';
+import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
+import { UserMongoDocument } from '../users/schemas/user.schema';
 
 @Controller()
 @ApiTags('Chat')
@@ -83,25 +84,26 @@ export class ChatsController {
   @Get('user/personal-chats')
   @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
-  @UseInterceptors(ClassSerializerInterceptor)
   async getPersonalChats(
     @Query() query: ChatsQueryDto,
     @AuthData() authData: RequestAuthData,
-  ): Promise<PersonalChatDto[]> {
-    return this.chatsService.getPersonalChatsOfUser(authData.user.id, query);
+  ): Promise<PersonalChatFromMongoDto[]> {
+    return this.chatsService.getPersonalChatsFromMongoOfUser(
+      (authData.user as UserMongoDocument)._id,
+      query,
+    );
   }
 
   @Get('user/personal-chats/:chatId')
   @UseGuards(UserAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatDto })
-  @UseInterceptors(ClassSerializerInterceptor)
   async getPersonalChat(
-    @Param() { chatId }: ChatPathDto,
+    @Param() { chatId }: ChatPathForMongoDto,
     @AuthData() authData: RequestAuthData,
-  ): Promise<PersonalChatDto> {
-    return this.chatsService.getPersonalChatOfUserOrFailHttp(
-      authData.user.id,
-      chatId,
+  ): Promise<PersonalChatFromMongoDto> {
+    return this.chatsService.getPersonalChatOfUserFromMongoOrFailHttp(
+      (authData.user as UserMongoDocument)._id,
+      new Types.ObjectId(chatId),
     );
   }
 
@@ -110,9 +112,12 @@ export class ChatsController {
   @ApiOkResponse({ type: () => PersonalChatDto })
   @UseInterceptors(ClassSerializerInterceptor)
   async setRead(
-    @Param() { chatId }: ChatPathDto,
+    @Param() { chatId }: ChatPathForMongoDto,
     @AuthData() authData: RequestAuthData,
-  ): Promise<PersonalChatDto> {
-    return this.chatsService.readPersonalChatAsUser(chatId, authData.user.id);
+  ): Promise<PersonalChatFromMongoDto> {
+    return this.chatsService.readPersonalChatInMongoAsUser(
+      new Types.ObjectId(chatId),
+      (authData.user as UserMongoDocument)._id,
+    );
   }
 }

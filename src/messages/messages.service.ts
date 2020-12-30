@@ -53,7 +53,7 @@ export class MessagesService {
   async createMessageInMongo(
     options: CreateMessageInMongoOptions,
   ): Promise<MessageMongoDocument> {
-    await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
+    const chat = await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
       options.chatId,
       options.userId,
     );
@@ -68,8 +68,10 @@ export class MessagesService {
       privateExternalMetadata: options.privateExternalMetadata,
     });
 
-    // TODO: read messages of companion
-
+    await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
+      chat._id,
+      chat.firstCompanion._id.equals(options.userId) ? 1 : 2,
+    );
     await this.chatsService.setLastMessageOfChat(options.chatId, message);
 
     return message;

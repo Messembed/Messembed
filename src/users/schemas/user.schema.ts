@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type UserMongoDocument = UserMongo & Document;
 
@@ -7,6 +7,8 @@ export type UserMongoDocument = UserMongo & Document;
   minimize: false,
 })
 export class UserMongo {
+  _id: Types.ObjectId;
+
   @Prop({ type: String, required: true, unique: true })
   externalId: string;
 
