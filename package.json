@@ -39,7 +39,6 @@
     "@nestjs/passport": "^7.1.0",
     "@nestjs/platform-express": "^7.0.0",
     "@nestjs/swagger": "^4.5.11",
-    "@nestjs/typeorm": "^7.1.0",
     "@types/passport-http": "^0.3.8",
     "apollo-server-express": "^2.15.1",
     "axios": "^0.19.2",
@@ -55,14 +54,11 @@
     "passport-custom": "^1.1.1",
     "passport-http": "^0.3.0",
     "passport-jwt": "^4.0.0",
-    "pg": "^8.2.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4",
     "secure-compare": "^3.0.1",
-    "swagger-ui-express": "^4.1.4",
-    "typeorm": "^0.2.25",
-    "typeorm-transactional-cls-hooked": "^0.1.12"
+    "swagger-ui-express": "^4.1.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.0.0",

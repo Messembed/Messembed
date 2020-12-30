@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { configModuleOptions } from '../config';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatsModule } from '../chats/chats.module';
 import { UsersModule } from '../users/users.module';
 import { MessagesModule } from '../messages/messages.module';
@@ -11,7 +10,10 @@ import { AppController } from './app.controller';
 import { AppResolver } from './app.resolver';
 import { GraphqlApiModule } from '../graphql-api/graphql-api.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MONGODB_CONFIG_KEY, MongoDBConfigType } from '../config/mongodb.config';
+import {
+  MONGODB_CONFIG_KEY,
+  MongoDBConfigType,
+} from '../config/mongodb.config';
 
 @Module({
   imports: [
@@ -19,12 +21,11 @@ import { MONGODB_CONFIG_KEY, MongoDBConfigType } from '../config/mongodb.config'
     ChatsModule,
     UsersModule,
     MessagesModule,
-    TypeOrmModule.forRoot(),
     MongooseModule.forRootAsync({
       useFactory: (mongodbConfig: MongoDBConfigType) => ({
         uri: mongodbConfig.uri,
       }),
-      inject: [MONGODB_CONFIG_KEY]
+      inject: [MONGODB_CONFIG_KEY],
     }),
     ConfigModule.forRoot(configModuleOptions),
     GraphQLModule.forRoot({

@@ -1,6 +1,5 @@
 import { MessageMongo } from '../../messages/schemas/message.schema';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import { DeepPartial } from 'typeorm';
 import { Types } from 'mongoose';
 import { UserMongo } from '../../users/schemas/user.schema';
 import { ChatMongoDocument } from '../schemas/chat.schema';
@@ -65,7 +64,7 @@ export class PersonalChatFromMongoDto {
     });
   }
 
-  constructor(fields: DeepPartial<PersonalChatFromMongoDto>) {
+  constructor(fields: PersonalChatFromMongoDto) {
     Object.assign(this, fields);
   }
 }

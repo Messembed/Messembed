@@ -1,6 +1,5 @@
 import { MessageMongo, MessageMongoDocument } from '../schemas/message.schema';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import { DeepPartial } from 'typeorm';
 
 export class PaginatedMessagesFromMongoDto {
   @ApiPropertyOptional()
@@ -19,7 +18,7 @@ export class PaginatedMessagesFromMongoDto {
   messages: MessageMongo[];
 
   constructor(
-    fields: DeepPartial<Omit<PaginatedMessagesFromMongoDto, 'messages'>> & {
+    fields: Omit<PaginatedMessagesFromMongoDto, 'messages'> & {
       messages: MessageMongoDocument[];
     },
   ) {
