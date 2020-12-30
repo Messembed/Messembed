@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Inject } from '@nestjs/common';
 import { JwtAuthTokenPayload } from '../interfaces/jwt-auth-token-payload.interface';
 import { RequestAuthData } from '../classes/request-auth-data.class';
-import { UsersRepository } from '../../users/repositories/users.repository';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../../config/auth.config';
 import { UsersService } from '../../users/users.service';
 

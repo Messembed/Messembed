@@ -9,10 +9,8 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { Message } from './entities/message.entity';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
 import { UserOrExternalServiceAuthGuard } from '../auth/guards/user-or-external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
@@ -45,7 +43,7 @@ export class MessagesController {
     ),
   )
   @UseGuards(UserOrExternalServiceAuthGuard)
-  @ApiCreatedResponse({ type: () => Message })
+  @ApiCreatedResponse({ type: () => Object })
   async createMessage(
     @Param() { chatId }: ChatPathForMongoDto,
     @Body() createDto: CreateMessageInMongoDto,
@@ -71,7 +69,7 @@ export class MessagesController {
       transform: true,
     }),
   )
-  @ApiOkResponse({ type: () => PaginatedMessagesDto, isArray: true })
+  @ApiOkResponse({ type: () => Object, isArray: true })
   async getMessages(
     @Param() { chatId }: ChatPathForMongoDto,
     @Query() filters: GetMessagesFromMongoFiltersDto,

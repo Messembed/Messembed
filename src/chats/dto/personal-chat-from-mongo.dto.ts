@@ -1,7 +1,5 @@
-import { Message } from '../../messages/entities/message.entity';
 import { MessageMongo } from '../../messages/schemas/message.schema';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
-import { User } from '../../users/entities/user.entity';
 import { DeepPartial } from 'typeorm';
 import { Types } from 'mongoose';
 import { UserMongo } from '../../users/schemas/user.schema';
@@ -29,10 +27,10 @@ export class PersonalChatFromMongoDto {
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   externalMetadata?: Record<string, unknown> | null;
 
-  @ApiPropertyOptional({ type: () => Message })
+  @ApiPropertyOptional({ type: () => Object })
   lastMessage: MessageMongo;
 
-  @ApiProperty({ type: () => User })
+  @ApiProperty({ type: () => Object })
   companion: UserMongo;
 
   @ApiProperty()

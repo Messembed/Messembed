@@ -8,7 +8,6 @@ import {
   Patch,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserPathDto } from './dto/user-path.dto';
@@ -26,20 +25,20 @@ export class UsersController {
 
   @Post('users')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiCreatedResponse({ type: () => User })
+  @ApiCreatedResponse({ type: () => Object })
   async createUser(@Body() createDto: CreateUserDto): Promise<any> {
     return (await this.usersService.createUserInMongo(createDto)).toJSON();
   }
 
   @Get('users/:userId')
-  @ApiOkResponse({ type: () => User })
+  @ApiOkResponse({ type: () => Object })
   async getUser(@Param() { userId }: UserPathDto): Promise<any> {
     return (await this.usersService.getUserFromMongo(userId)).toJSON();
   }
 
   @Patch('users/:userId')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => User })
+  @ApiOkResponse({ type: () => Object })
   async editUser(
     @Param() { userId }: UserPathDto,
     @Body() editDto: EditUserDto,
@@ -56,7 +55,7 @@ export class UsersController {
 
   @Get('user')
   @UseGuards(UserAuthGuard)
-  @ApiOkResponse({ type: () => User })
+  @ApiOkResponse({ type: () => Object })
   async getMe(@AuthData() authData: RequestAuthData): Promise<any> {
     return (
       await this.usersService.getUserFromMongo(authData.user.id)

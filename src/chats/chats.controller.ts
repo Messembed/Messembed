@@ -12,13 +12,10 @@ import {
   Query,
   Patch,
 } from '@nestjs/common';
-import { Chat } from './entities/chat.entity';
 import { ChatsService } from './chats.service';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { EditChatDto } from './dto/edit-chat.dto';
-import { PaginatedChatsDto } from './dto/paginated-chats.dto';
-import { PersonalChatDto } from './dto/personal-chat.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
@@ -42,7 +39,7 @@ export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
   @Post('chats')
-  @ApiCreatedResponse({ type: () => Chat })
+  @ApiCreatedResponse({ type: () => Object })
   @UseGuards(ExternalServiceAuthGuard)
   async createChat(@Body() createDto: CreateChatDto): Promise<any> {
     return (await this.chatsService.createChatInMongo(createDto)).toJSON();
@@ -50,7 +47,7 @@ export class ChatsController {
 
   @Patch('chats/:chatId')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => Chat })
+  @ApiOkResponse({ type: () => Object })
   async editChat(
     @Param() { chatId }: ChatPathForMongoDto,
     @Body() editDto: EditChatDto,
@@ -65,7 +62,7 @@ export class ChatsController {
 
   @Get('chats/:chatId')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => Chat })
+  @ApiOkResponse({ type: () => Object })
   async getChat(@Param() { chatId }: ChatPathForMongoDto): Promise<any> {
     return (
       await this.chatsService.getChatFromMongoOrFailHttp(
@@ -76,14 +73,14 @@ export class ChatsController {
 
   @Get('chats')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => PaginatedChatsDto })
+  @ApiOkResponse({ type: () => Object })
   async getAllChats(): Promise<PaginatedChatsInMongoDto> {
     return this.chatsService.getAllChatsFromMongo();
   }
 
   @Get('user/personal-chats')
   @UseGuards(UserAuthGuard)
-  @ApiOkResponse({ type: () => PersonalChatDto, isArray: true })
+  @ApiOkResponse({ type: () => Object, isArray: true })
   async getPersonalChats(
     @Query() query: ChatsQueryDto,
     @AuthData() authData: RequestAuthData,
@@ -96,7 +93,7 @@ export class ChatsController {
 
   @Get('user/personal-chats/:chatId')
   @UseGuards(UserAuthGuard)
-  @ApiOkResponse({ type: () => PersonalChatDto })
+  @ApiOkResponse({ type: () => Object })
   async getPersonalChat(
     @Param() { chatId }: ChatPathForMongoDto,
     @AuthData() authData: RequestAuthData,
@@ -109,7 +106,7 @@ export class ChatsController {
 
   @Post('user/personal-chats/:chatId/read-status')
   @UseGuards(UserAuthGuard)
-  @ApiOkResponse({ type: () => PersonalChatDto })
+  @ApiOkResponse({ type: () => Object })
   @UseInterceptors(ClassSerializerInterceptor)
   async setRead(
     @Param() { chatId }: ChatPathForMongoDto,

@@ -3,20 +3,20 @@ import { Strategy } from 'passport-custom';
 import express, { Request } from 'express';
 import { RequestAuthData } from '../classes/request-auth-data.class';
 import axios from 'axios';
-import { UsersRepository } from '../../users/repositories/users.repository';
 import { Injectable, Inject } from '@nestjs/common';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../../config/auth.config';
 import { ExternalServiceService } from '../../external-service/external-service.service';
-import { User } from '../../users/entities/user.entity';
 import { EventName } from '../../external-service/constants/event-name.enum';
+import { UsersService } from '../../users/users.service';
+import { UserMongoDocument } from '../../users/schemas/user.schema';
 
 @Injectable()
 export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
   constructor(
-    private readonly usersRepo: UsersRepository,
     private readonly externalServiceService: ExternalServiceService,
     @Inject(AUTH_CONFIG_KEY)
     private readonly authConfig: AuthConfigType,
+    private readonly usersService: UsersService,
   ) {
     super();
   }
@@ -30,7 +30,7 @@ export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
       throw new Error('Cookie header is not present in the request');
     }
 
-    const user = await this.getUser(req);
+    const user = await this.getUserFromMongo(req);
 
     return new RequestAuthData({
       user,
@@ -39,7 +39,7 @@ export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
     });
   }
 
-  async getUser(req: Request): Promise<User> {
+  private async getUserFromMongo(req: Request): Promise<UserMongoDocument> {
     const { data: profile } = await axios.get(
       this.authConfig.cookiesStrategy.verifyUrl,
       {
@@ -51,7 +51,7 @@ export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
 
     const userId = profile.id;
 
-    let user = await this.usersRepo.findOne(userId);
+    let user = await this.usersService.findOneUserByExternalId(userId);
 
     if (!user) {
       await this.externalServiceService.sendEvent({
@@ -61,7 +61,9 @@ export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
         },
       });
 
-      user = await this.usersRepo.findOneOrFail(userId);
+      user = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
+        userId,
+      );
     }
 
     return user;

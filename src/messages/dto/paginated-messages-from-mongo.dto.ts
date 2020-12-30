@@ -1,7 +1,6 @@
 import { MessageMongo, MessageMongoDocument } from '../schemas/message.schema';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { DeepPartial } from 'typeorm';
-import { Message } from '../entities/message.entity';
 
 export class PaginatedMessagesFromMongoDto {
   @ApiPropertyOptional()
@@ -16,7 +15,7 @@ export class PaginatedMessagesFromMongoDto {
   @ApiPropertyOptional()
   limit?: number;
 
-  @ApiProperty({ type: () => Message, isArray: true })
+  @ApiProperty({ type: () => Object, isArray: true })
   messages: MessageMongo[];
 
   constructor(

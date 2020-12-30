@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 
 declare global {

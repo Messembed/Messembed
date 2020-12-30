@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../entities/user.entity';
 import { UserMongoDocument } from '../schemas/user.schema';
 
 export class PaginatedUserInMongoDto {
-  @ApiProperty({ type: () => User, isArray: true })
+  @ApiProperty({ type: () => Object, isArray: true })
   data: any[];
 
   @ApiProperty()
