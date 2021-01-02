@@ -35,3 +35,6 @@ lerna-debug.log*
 
 # Secrets
 *.env
+
+# Temp
+/.docker
