@@ -10,7 +10,7 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/src/main.ts",
       "preLaunchTask": "tsc: build - tsconfig.build.json",
-      "runtimeVersion": "12.14.0",
+      "runtimeVersion": "14.15.3",
       "runtimeArgs": ["--require", "source-map-support/register"],
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "console": "integratedTerminal",
