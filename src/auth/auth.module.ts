@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { AuthAdminController } from './auth.admin-controller';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ExternalServiceBasicStrategy } from './strategies/external-service-basic.strategy';
@@ -26,6 +27,6 @@ import { UsersModule } from '../users/users.module';
     ExternalServiceBasicStrategy,
     CookiesStrategy,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, AuthAdminController],
 })
 export class AuthModule {}

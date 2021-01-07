@@ -24,13 +24,10 @@ import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mon
 
 @Controller()
 @ApiTags('Messages')
-export class MessagesController {
+export class MessagesAdminController {
   constructor(private readonly messagesService: MessagesService) {}
 
-  /**
-   * @todo we need to remove external service auth strategy, as we have special MessagesAdminController
-   */
-  @Post('chats/:chatId/messages')
+  @Post('admin-api/chats/:chatId/messages')
   @UsePipes(
     ExtendedValidationPipe(
       {
@@ -64,10 +61,7 @@ export class MessagesController {
     ).toJSON();
   }
 
-  /**
-   * @todo we need to remove external service auth strategy, as we have special MessagesAdminController
-   */
-  @Get('chats/:chatId/messages')
+  @Get('admin-api/chats/:chatId/messages')
   @UseGuards(UserOrExternalServiceAuthGuard)
   @UsePipes(
     new ValidationPipe({
