@@ -25,7 +25,7 @@ export class ChatMongo {
   deletedAt?: Date | null;
 
   @Prop({ type: String })
-  title: string;
+  title?: string;
 
   @Prop({ type: Boolean })
   active: boolean;

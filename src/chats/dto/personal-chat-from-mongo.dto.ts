@@ -5,7 +5,7 @@ import { UserMongo } from '../../users/schemas/user.schema';
 import { ChatMongoDocument } from '../schemas/chat.schema';
 
 export class PersonalChatFromMongoDto {
-  @ApiProperty()
+  @ApiProperty({ type: 'string' })
   _id: Types.ObjectId;
 
   @ApiProperty({ type: 'string', format: 'ISO 8061' })

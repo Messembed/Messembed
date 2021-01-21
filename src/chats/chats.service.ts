@@ -13,6 +13,7 @@ import { MessageMongoDocument } from '../messages/schemas/message.schema';
 import { UserMongoDocument } from '../users/schemas/user.schema';
 import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
 import _ from 'lodash';
+import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 
 @Injectable()
 export class ChatsService {
@@ -21,6 +22,29 @@ export class ChatsService {
     private readonly chatModel: Model<ChatMongoDocument>,
     private readonly usersService: UsersService,
   ) {}
+
+  async createPersonalChat(
+    currentUserExternalId: string,
+    createData: CreatePersonalChatDto,
+  ): Promise<PersonalChatFromMongoDto> {
+    const currentUser = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
+      currentUserExternalId,
+    );
+    const secondCompanion = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
+      createData.companionId,
+    );
+
+    const chat = await this.chatModel.create({
+      createdAt: new Date(),
+      active: true,
+      firstCompanion: currentUser,
+      secondCompanion: secondCompanion,
+      externalMetadata: null,
+      privateExternalMetadata: null,
+    });
+
+    return PersonalChatFromMongoDto.createFromChat(chat, currentUser._id);
+  }
 
   async createChatInMongo(
     createDto: CreateChatDto,

@@ -26,6 +26,7 @@ import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 import { Types } from 'mongoose';
 import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
 import { UserMongoDocument } from '../users/schemas/user.schema';
+import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 
 @Controller()
 @ApiTags('Chat')
@@ -76,6 +77,19 @@ export class ChatsController {
   @ApiOkResponse({ type: () => Object })
   async getAllChats(): Promise<PaginatedChatsInMongoDto> {
     return this.chatsService.getAllChatsFromMongo();
+  }
+
+  @Post('user/personal-chats')
+  @UseGuards(UserAuthGuard)
+  @ApiOkResponse({ type: () => PersonalChatFromMongoDto })
+  async createPersonalChat(
+    @Body() createData: CreatePersonalChatDto,
+    @AuthData() authData: RequestAuthData,
+  ): Promise<PersonalChatFromMongoDto> {
+    return this.chatsService.createPersonalChat(
+      authData.user.externalId,
+      createData,
+    );
   }
 
   @Get('user/personal-chats')
