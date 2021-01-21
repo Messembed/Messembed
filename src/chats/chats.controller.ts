@@ -10,19 +10,14 @@ import {
   UsePipes,
   ValidationPipe,
   Query,
-  Patch,
 } from '@nestjs/common';
 import { ChatsService } from './chats.service';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { EditChatDto } from './dto/edit-chat.dto';
-import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatsQueryDto } from './dto/chats-query.dto';
 import { UserAuthGuard } from '../auth/guards/user-auth.guard';
 import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
-import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 import { Types } from 'mongoose';
 import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
 import { UserMongoDocument } from '../users/schemas/user.schema';
@@ -38,46 +33,6 @@ import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 )
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
-
-  @Post('chats')
-  @ApiCreatedResponse({ type: () => Object })
-  @UseGuards(ExternalServiceAuthGuard)
-  async createChat(@Body() createDto: CreateChatDto): Promise<any> {
-    return (await this.chatsService.createChatInMongo(createDto)).toJSON();
-  }
-
-  @Patch('chats/:chatId')
-  @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => Object })
-  async editChat(
-    @Param() { chatId }: ChatPathForMongoDto,
-    @Body() editDto: EditChatDto,
-  ): Promise<any> {
-    return (
-      await this.chatsService.editChatInMongo(
-        new Types.ObjectId(chatId),
-        editDto,
-      )
-    ).toJSON();
-  }
-
-  @Get('chats/:chatId')
-  @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => Object })
-  async getChat(@Param() { chatId }: ChatPathForMongoDto): Promise<any> {
-    return (
-      await this.chatsService.getChatFromMongoOrFailHttp(
-        new Types.ObjectId(chatId),
-      )
-    ).toJSON();
-  }
-
-  @Get('chats')
-  @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => Object })
-  async getAllChats(): Promise<PaginatedChatsInMongoDto> {
-    return this.chatsService.getAllChatsFromMongo();
-  }
 
   @Post('user/personal-chats')
   @UseGuards(UserAuthGuard)

@@ -11,16 +11,14 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { UserOrExternalServiceAuthGuard } from '../auth/guards/user-or-external-service-auth.guard';
 import { AuthData } from '../auth/decorators/auth-data.decorator';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
-import { ExtendedValidationPipe } from '../common/pipes/extended-validation.pipe';
-import { ValidationGroup } from '../common/constants/validation-group.enum';
 import { ChatPathForMongoDto } from '../chats/dto/chat-path-for-mongo.dto';
 import { CreateMessageInMongoDto } from './dto/create-message-in-mongo.dto';
 import { Types } from 'mongoose';
 import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
 import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
+import { UserAuthGuard } from '../auth/guards/user-auth.guard';
 
 @Controller()
 @ApiTags('Messages')
@@ -32,20 +30,12 @@ export class MessagesController {
    */
   @Post('chats/:chatId/messages')
   @UsePipes(
-    ExtendedValidationPipe(
-      {
-        whitelist: true,
-        transform: true,
-      },
-      req => [
-        ValidationGroup.ALL,
-        req.user.isExternalService
-          ? ValidationGroup.EXT_SER
-          : ValidationGroup.USER,
-      ],
-    ),
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
   )
-  @UseGuards(UserOrExternalServiceAuthGuard)
+  @UseGuards(UserAuthGuard)
   @ApiCreatedResponse({ type: () => Object })
   async createMessage(
     @Param() { chatId }: ChatPathForMongoDto,
@@ -56,10 +46,7 @@ export class MessagesController {
       await this.messagesService.createMessageInMongo({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
-        userId:
-          createDto.userId !== null || createDto.userId !== undefined
-            ? new Types.ObjectId(createDto.userId)
-            : new Types.ObjectId(authData.user.id),
+        userId: new Types.ObjectId(authData.user.id),
       })
     ).toJSON();
   }
@@ -68,7 +55,7 @@ export class MessagesController {
    * @todo we need to remove external service auth strategy, as we have special MessagesAdminController
    */
   @Get('chats/:chatId/messages')
-  @UseGuards(UserOrExternalServiceAuthGuard)
+  @UseGuards(UserAuthGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
