@@ -16,6 +16,8 @@ async function bootstrap() {
   const PORT = configServer.get('PORT');
   const HOST = configServer.get('HOST');
 
+  app.enableCors();
+
   await app.listen(PORT, HOST);
   logger.log(`Server is listening on http://${HOST}:${PORT}`);
 }
