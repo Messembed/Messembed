@@ -67,7 +67,7 @@ export class UsersController {
   @ApiOkResponse({ type: () => Object })
   async getMe(@AuthData() authData: RequestAuthData): Promise<any> {
     return (
-      await this.usersService.getUserFromMongo(authData.user.id)
+      await this.usersService.getUserFromMongo(authData.user.externalId)
     ).toJSON();
   }
 }
