@@ -24,13 +24,13 @@ export class ChatsService {
   ) {}
 
   async createPersonalChat(
-    currentUserExternalId: string,
+    currentUserId: string,
     createData: CreatePersonalChatDto,
   ): Promise<PersonalChatFromMongoDto> {
-    const currentUser = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
-      currentUserExternalId,
+    const currentUser = await this.usersService.findOneUserFromMongoOrFail(
+      currentUserId,
     );
-    const secondCompanion = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
+    const secondCompanion = await this.usersService.findOneUserFromMongoOrFail(
       createData.companionId,
     );
 
@@ -114,7 +114,7 @@ export class ChatsService {
    * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
    */
   async getPersonalChatsFromMongoOfUser(
-    userId: Types.ObjectId,
+    userId: string,
     query?: ChatsQueryDto,
   ): Promise<PersonalChatFromMongoDto[]> {
     const externalMetadataFilters: Record<string, unknown> =
@@ -148,7 +148,7 @@ export class ChatsService {
    * Если чат не найден, то выбрасывается ошибка HttpException
    */
   async getPersonalChatOfUserFromMongoOrFailHttp(
-    userId: Types.ObjectId,
+    userId: string,
     chatId: Types.ObjectId,
   ): Promise<PersonalChatFromMongoDto> {
     const chat = await this.chatModel.findOne({
@@ -201,7 +201,7 @@ export class ChatsService {
    */
   async findChatByIdAndCompanionInMongoOrFailHttp(
     chatId: Types.ObjectId,
-    userId: Types.ObjectId,
+    userId: string,
   ): Promise<ChatMongoDocument> {
     const chat = await this.chatModel.findOne({
       $or: [
@@ -230,7 +230,7 @@ export class ChatsService {
    */
   async readPersonalChatInMongoAsUser(
     chatId: Types.ObjectId,
-    userId: Types.ObjectId,
+    userId: string,
   ): Promise<PersonalChatFromMongoDto> {
     const chat = await this.chatModel.findOne({
       _id: chatId,
@@ -244,7 +244,7 @@ export class ChatsService {
       throw ErrorGenerator.create('CHAT_NOT_FOUND');
     }
 
-    if (userId.equals(chat.firstCompanion._id)) {
+    if (userId === chat.firstCompanion._id) {
       chat.notReadByFirstCompanionMessagesCount = 0;
     } else {
       chat.notReadBySecondCompanionMessagesCount = 0;

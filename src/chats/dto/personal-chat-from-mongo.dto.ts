@@ -37,14 +37,14 @@ export class PersonalChatFromMongoDto {
 
   static createFromChats(
     chats: ChatMongoDocument[],
-    userId: Types.ObjectId,
+    userId: string,
   ): PersonalChatFromMongoDto[] {
     return chats.map(chat => this.createFromChat(chat, userId));
   }
 
   static createFromChat(
     chat: ChatMongoDocument,
-    userId: Types.ObjectId,
+    userId: string,
   ): PersonalChatFromMongoDto {
     return new PersonalChatFromMongoDto({
       _id: chat._id,
@@ -55,12 +55,14 @@ export class PersonalChatFromMongoDto {
       active: chat.active,
       externalMetadata: chat.externalMetadata,
       lastMessage: chat.lastMessage.toJSON(),
-      companion: chat.firstCompanion._id.equals(userId)
-        ? chat.secondCompanion.toJSON()
-        : chat.firstCompanion.toJSON(),
-      unreadMessagesCount: chat.firstCompanion._id.equals(userId)
-        ? chat.notReadBySecondCompanionMessagesCount
-        : chat.notReadByFirstCompanionMessagesCount,
+      companion:
+        chat.firstCompanion._id === userId
+          ? chat.secondCompanion.toJSON()
+          : chat.firstCompanion.toJSON(),
+      unreadMessagesCount:
+        chat.firstCompanion._id === userId
+          ? chat.notReadBySecondCompanionMessagesCount
+          : chat.notReadByFirstCompanionMessagesCount,
     });
   }
 

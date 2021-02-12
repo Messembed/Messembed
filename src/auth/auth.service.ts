@@ -13,9 +13,7 @@ export class AuthService {
   ) {}
 
   async createAccessTokenByUserId(userId: string): Promise<AccessTokenDto> {
-    const user = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
-      userId,
-    );
+    const user = await this.usersService.findOneUserFromMongoOrFail(userId);
 
     return this.createAccessTokenForMongo(user);
   }
@@ -24,7 +22,7 @@ export class AuthService {
     user: UserMongoDocument,
   ): Promise<AccessTokenDto> {
     const payload: JwtAuthTokenPayload = {
-      sub: user.id,
+      sub: user._id,
     };
 
     return new AccessTokenDto({

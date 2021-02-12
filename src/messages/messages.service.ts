@@ -39,7 +39,7 @@ export class MessagesService {
 
     await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
       chat._id,
-      chat.firstCompanion._id.equals(options.userId) ? 1 : 2,
+      chat.firstCompanion._id === options.userId ? 1 : 2,
     );
     await this.chatsService.setLastMessageOfChat(options.chatId, message);
 

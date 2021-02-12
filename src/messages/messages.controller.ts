@@ -46,7 +46,7 @@ export class MessagesController {
       await this.messagesService.createMessageInMongo({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
-        userId: new Types.ObjectId(authData.user.id),
+        userId: authData.user._id,
       })
     ).toJSON();
   }

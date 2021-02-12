@@ -51,7 +51,7 @@ export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
 
     const userId = profile.id;
 
-    let user = await this.usersService.findOneUserByExternalId(userId);
+    let user = await this.usersService.findOneUserById(userId);
 
     if (!user) {
       await this.externalServiceService.sendEvent({
@@ -61,9 +61,7 @@ export class CookiesStrategy extends PassportStrategy(Strategy, 'cookies') {
         },
       });
 
-      user = await this.usersService.findOneUserByExternalIdFromMongoOrFail(
-        userId,
-      );
+      user = await this.usersService.findOneUserFromMongoOrFail(userId);
     }
 
     return user;

@@ -41,10 +41,7 @@ export class ChatsController {
     @Body() createData: CreatePersonalChatDto,
     @AuthData() authData: RequestAuthData,
   ): Promise<PersonalChatFromMongoDto> {
-    return this.chatsService.createPersonalChat(
-      authData.user.externalId,
-      createData,
-    );
+    return this.chatsService.createPersonalChat(authData.user._id, createData);
   }
 
   @Get('user/personal-chats')
@@ -55,7 +52,7 @@ export class ChatsController {
     @AuthData() authData: RequestAuthData,
   ): Promise<PersonalChatFromMongoDto[]> {
     return this.chatsService.getPersonalChatsFromMongoOfUser(
-      (authData.user as UserMongoDocument)._id,
+      authData.user._id,
       query,
     );
   }

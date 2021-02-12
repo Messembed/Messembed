@@ -1,16 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-
-export type UserMongoDocument = UserMongo & Document;
+import { Document } from 'mongoose';
+export interface UserMongoDocument extends UserMongo, Document {
+  _id: string;
+}
 
 @Schema({
   minimize: false,
 })
 export class UserMongo {
-  _id: Types.ObjectId;
-
-  @Prop({ type: String, required: true, unique: true })
-  externalId: string;
+  @Prop({ type: String })
+  _id: string;
 
   @Prop({ type: Date })
   createdAt: Date;

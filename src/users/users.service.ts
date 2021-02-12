@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { UserMongo, UserMongoDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
@@ -20,8 +20,7 @@ export class UsersService {
   ): Promise<UserMongoDocument> {
     try {
       const user = await this.userModel.create({
-        _id: new Types.ObjectId(),
-        externalId: createDto.id,
+        _id: createDto.id,
         createdAt: new Date(),
         updatedAt: null,
         deletedAt: null,
@@ -43,7 +42,7 @@ export class UsersService {
     editDto: EditUserDto,
   ): Promise<UserMongoDocument> {
     const user = await this.userModel.findOne({
-      externalId: userId,
+      _id: userId,
       deletedAt: null,
     });
 
@@ -60,7 +59,7 @@ export class UsersService {
 
   async getUserFromMongo(userId: string): Promise<UserMongoDocument> {
     const user = await this.userModel.findOne({
-      externalId: userId,
+      _id: userId,
       deletedAt: null,
     });
 
@@ -78,9 +77,7 @@ export class UsersService {
     return new PaginatedUserInMongoDto(users, totalCount);
   }
 
-  async findOneUserFromMongoOrFail(
-    userId: string | Types.ObjectId,
-  ): Promise<UserMongoDocument> {
+  async findOneUserFromMongoOrFail(userId: string): Promise<UserMongoDocument> {
     const user = await this.userModel.findOne({ _id: userId });
     if (!user) {
       throw new Error(`User not found with id ${userId}`);
@@ -89,18 +86,7 @@ export class UsersService {
     return user;
   }
 
-  async findOneUserByExternalIdFromMongoOrFail(
-    userId: string,
-  ): Promise<UserMongoDocument> {
-    const user = await this.userModel.findOne({ externalId: userId });
-    if (!user) {
-      throw new Error(`User not found with id ${userId}`);
-    }
-
-    return user;
-  }
-
-  async findOneUserByExternalId(userId: string): Promise<UserMongoDocument> {
-    return this.userModel.findOne({ externalId: userId });
+  async findOneUserById(userId: string): Promise<UserMongoDocument> {
+    return this.userModel.findOne({ _id: userId });
   }
 }

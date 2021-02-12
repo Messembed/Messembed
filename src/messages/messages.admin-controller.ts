@@ -42,7 +42,7 @@ export class MessagesAdminController {
       await this.messagesService.createMessageInMongo({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
-        userId: new Types.ObjectId(createDto.userId),
+        userId: createDto.userId,
       })
     ).toJSON();
   }

@@ -23,8 +23,8 @@ export class MessageMongo {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ChatMongo' })
   chat: Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'UserMongo' })
-  user: Types.ObjectId;
+  @Prop({ type: String, ref: 'UserMongo' })
+  user: string;
 
   @Prop({ type: String })
   content: string;
