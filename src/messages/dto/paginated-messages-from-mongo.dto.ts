@@ -1,5 +1,5 @@
-import { MessageMongo, MessageMongoDocument } from '../schemas/message.schema';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
+import { MessageForFrontend } from './message-for-frontend.dto';
 
 export class PaginatedMessagesFromMongoDto {
   @ApiPropertyOptional()
@@ -15,16 +15,9 @@ export class PaginatedMessagesFromMongoDto {
   limit?: number;
 
   @ApiProperty({ type: () => Object, isArray: true })
-  messages: MessageMongo[];
+  messages: MessageForFrontend[];
 
-  constructor(
-    fields: Omit<PaginatedMessagesFromMongoDto, 'messages'> & {
-      messages: MessageMongoDocument[];
-    },
-  ) {
-    Object.assign(this, {
-      ...fields,
-      messages: fields.messages.map(msg => msg.toJSON()),
-    });
+  constructor(fields: PaginatedMessagesFromMongoDto) {
+    Object.assign(this, fields);
   }
 }

@@ -8,4 +8,6 @@ export const errors = {
   UNAUTHORIZED: HttpStatus.UNAUTHORIZED,
 
   USER_ID_IS_NOT_UNIQUE: HttpStatus.CONFLICT,
+
+  CHAT_ALREADY_EXISTS: HttpStatus.CONFLICT,
 };

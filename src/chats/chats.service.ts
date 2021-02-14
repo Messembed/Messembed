@@ -56,6 +56,15 @@ export class ChatsService {
       createDto.secondCompanionId,
     );
 
+    const existingChat = await this.chatModel.findOne({
+      'firstCompanion._id': firstCompanion._id,
+      'secondCompanion._id': secondCompanion._id,
+    });
+
+    if (existingChat) {
+      throw ErrorGenerator.create('CHAT_ALREADY_EXISTS');
+    }
+
     createDto.title = createDto.title;
     createDto.externalMetadata = createDto.externalMetadata;
     createDto.privateExternalMetadata = createDto.privateExternalMetadata;
@@ -125,13 +134,15 @@ export class ChatsService {
           )
         : {};
 
-    const chats = await this.chatModel.find({
-      $or: [
-        { 'firstCompanion._id': userId },
-        { 'secondCompanion._id': userId },
-      ],
-      ...externalMetadataFilters,
-    });
+    const chats = await this.chatModel
+      .find({
+        $or: [
+          { 'firstCompanion._id': userId },
+          { 'secondCompanion._id': userId },
+        ],
+        ...externalMetadataFilters,
+      })
+      .sort({ 'lastMessage.createdAt': 'desc' });
 
     const personalChats = PersonalChatFromMongoDto.createFromChats(
       chats,

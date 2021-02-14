@@ -7,6 +7,7 @@ import { MessageMongo, MessageMongoDocument } from './schemas/message.schema';
 import { Model, Types } from 'mongoose';
 import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
 import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
+import { MessageForFrontend } from './dto/message-for-frontend.dto';
 import { Condition } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 
@@ -56,18 +57,28 @@ export class MessagesService {
       authData,
     );
 
-    return this.getPaginatedMessagesFromMongo(chat._id, filters);
+    return this.getPaginatedMessagesFromMongo(
+      chat._id,
+      filters,
+      authData.user && authData.user._id,
+    );
   }
 
   async getPaginatedMessagesFromMongo(
     chatId: Types.ObjectId,
     filters?: GetMessagesFromMongoFiltersDto,
+    currentUserId?: string,
   ): Promise<PaginatedMessagesFromMongoDto> {
     const messages = await this.getMessagesFromMongo(chatId, filters);
 
+    const messagesForFrontend = MessageForFrontend.fromMessages(
+      messages,
+      currentUserId,
+    );
+
     return new PaginatedMessagesFromMongoDto({
       ...filters,
-      messages,
+      messages: messagesForFrontend,
     });
   }
 

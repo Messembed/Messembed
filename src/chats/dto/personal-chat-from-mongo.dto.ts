@@ -54,15 +54,15 @@ export class PersonalChatFromMongoDto {
       title: chat.title,
       active: chat.active,
       externalMetadata: chat.externalMetadata,
-      lastMessage: chat.lastMessage.toJSON(),
+      lastMessage: chat.lastMessage ? chat.lastMessage.toJSON() : null,
       companion:
         chat.firstCompanion._id === userId
           ? chat.secondCompanion.toJSON()
           : chat.firstCompanion.toJSON(),
       unreadMessagesCount:
         chat.firstCompanion._id === userId
-          ? chat.notReadBySecondCompanionMessagesCount
-          : chat.notReadByFirstCompanionMessagesCount,
+          ? chat.notReadByFirstCompanionMessagesCount
+          : chat.notReadBySecondCompanionMessagesCount,
     });
   }
 

@@ -1,19 +1,8 @@
-import {
-  IsString,
-  IsObject,
-  IsOptional,
-  IsEmpty,
-  IsMongoId,
-} from 'class-validator';
+import { IsString, IsObject, IsOptional, IsEmpty } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidationGroup } from '../../common/constants/validation-group.enum';
 
 export class CreateMessageInMongoDto {
-  @ApiProperty()
-  @IsMongoId({ groups: [ValidationGroup.EXT_SER] })
-  @IsEmpty({ groups: [ValidationGroup.USER] })
-  userId: string;
-
   @ApiProperty()
   @IsString({ groups: [ValidationGroup.ALL] })
   content: string;
