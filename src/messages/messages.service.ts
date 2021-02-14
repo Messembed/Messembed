@@ -10,12 +10,15 @@ import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-fi
 import { MessageForFrontend } from './dto/message-for-frontend.dto';
 import { Condition } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
+import { UpdatesService } from '../updates/updates.service';
 
 @Injectable()
 export class MessagesService {
   constructor(
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
+    @Inject(forwardRef(() => UpdatesService))
+    private readonly updatesService: UpdatesService,
     @InjectModel(MessageMongo.name)
     private readonly messageModel: Model<MessageMongoDocument>,
   ) {}
@@ -43,6 +46,12 @@ export class MessagesService {
       chat.firstCompanion._id === options.userId ? 1 : 2,
     );
     await this.chatsService.setLastMessageOfChat(options.chatId, message);
+
+    await this.updatesService.createUpdate({
+      chatId: options.chatId,
+      type: 'new_message',
+      message,
+    });
 
     return message;
   }

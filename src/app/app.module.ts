@@ -14,6 +14,7 @@ import {
   MONGODB_CONFIG_KEY,
   MongoDBConfigType,
 } from '../config/mongodb.config';
+import { UpdatesModule } from '../updates/updates.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import {
     ChatsModule,
     UsersModule,
     MessagesModule,
+    UpdatesModule,
     MongooseModule.forRootAsync({
       useFactory: (mongodbConfig: MongoDBConfigType) => ({
         uri: mongodbConfig.uri,

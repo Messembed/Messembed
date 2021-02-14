@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import {
   MessageMongoDocument,
   MessageMongoSchema,
@@ -15,6 +15,8 @@ export type ChatMongoDocument = ChatMongo & Document;
   minimize: false,
 })
 export class ChatMongo {
+  _id: Types.ObjectId;
+
   @Prop({ type: Date })
   createdAt: Date;
 

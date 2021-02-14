@@ -6,11 +6,13 @@ import { UsersModule } from '../users/users.module';
 import { MessagesModule } from '../messages/messages.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ChatMongo, ChatMongoSchema } from './schemas/chat.schema';
+import { UpdatesModule } from '../updates/updates.module';
 
 @Module({
   imports: [
     UsersModule,
     forwardRef(() => MessagesModule),
+    forwardRef(() => UpdatesModule),
     MongooseModule.forFeature([
       { name: ChatMongo.name, schema: ChatMongoSchema },
     ]),

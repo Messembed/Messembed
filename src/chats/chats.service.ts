@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { EditChatDto } from './dto/edit-chat.dto';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
@@ -14,12 +14,15 @@ import { UserMongoDocument } from '../users/schemas/user.schema';
 import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
 import _ from 'lodash';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
+import { UpdatesService } from '../updates/updates.service';
 
 @Injectable()
 export class ChatsService {
   constructor(
     @InjectModel(ChatMongo.name)
     private readonly chatModel: Model<ChatMongoDocument>,
+    @Inject(forwardRef(() => UpdatesService))
+    private readonly updatesService: UpdatesService,
     private readonly usersService: UsersService,
   ) {}
 
@@ -35,12 +38,19 @@ export class ChatsService {
     );
 
     const chat = await this.chatModel.create({
+      _id: new Types.ObjectId(),
       createdAt: new Date(),
       active: true,
       firstCompanion: currentUser,
       secondCompanion: secondCompanion,
       externalMetadata: null,
       privateExternalMetadata: null,
+    });
+
+    await this.updatesService.createUpdate({
+      chatId: chat._id,
+      type: 'new_chat',
+      chat,
     });
 
     return PersonalChatFromMongoDto.createFromChat(chat, currentUser._id);
@@ -70,6 +80,7 @@ export class ChatsService {
     createDto.privateExternalMetadata = createDto.privateExternalMetadata;
 
     const chat = await this.chatModel.create({
+      _id: new Types.ObjectId(),
       createdAt: new Date(),
       active: true,
       firstCompanion: firstCompanion,
@@ -77,6 +88,12 @@ export class ChatsService {
       title: createDto.title,
       externalMetadata: createDto.externalMetadata,
       privateExternalMetadata: createDto.privateExternalMetadata,
+    });
+
+    await this.updatesService.createUpdate({
+      chatId: chat._id,
+      type: 'new_chat',
+      chat,
     });
 
     return chat;
@@ -299,5 +316,23 @@ export class ChatsService {
         },
       },
     );
+  }
+
+  async getIdsOfChatsOfUser(userId: string): Promise<Types.ObjectId[]> {
+    const chats: { _id: Types.ObjectId }[] = await this.chatModel
+      .find(
+        {
+          $or: [
+            { 'firstCompanion._id': userId },
+            { 'secondCompanion._id': userId },
+          ],
+        },
+        { _id: true },
+      )
+      .exec();
+
+    const chatIds = _.map(chats, '_id');
+
+    return chatIds;
   }
 }
