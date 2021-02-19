@@ -41,17 +41,17 @@ export class MessagesService {
       privateExternalMetadata: options.privateExternalMetadata,
     });
 
-    await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
-      chat._id,
-      chat.firstCompanion._id === options.userId ? 1 : 2,
-    );
-    await this.chatsService.setLastMessageOfChat(options.chatId, message);
-
     await this.updatesService.createUpdate({
       chatId: options.chatId,
       type: 'new_message',
       message,
     });
+
+    await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
+      chat._id,
+      chat.firstCompanion._id === options.userId ? 1 : 2,
+    );
+    await this.chatsService.setLastMessageOfChat(options.chatId, message);
 
     return message;
   }

@@ -5,6 +5,7 @@ import { ChatsService } from '../chats/chats.service';
 import { CreateUpdateInput } from './interfaces/create-update-input.interface';
 import { UpdateDto } from './dto/update.dto';
 import { Update, UpdateDocument } from './schemas/update.schema';
+import { UpdatesGateway } from './updates.gateway';
 
 @Injectable()
 export class UpdatesService {
@@ -13,6 +14,7 @@ export class UpdatesService {
     private readonly chatsService: ChatsService,
     @InjectModel(Update.name)
     private readonly updateModel: Model<UpdateDocument>,
+    private readonly updatesGateway: UpdatesGateway,
   ) {}
 
   async getUpdatesForUser(
@@ -44,6 +46,13 @@ export class UpdatesService {
       message: data.message,
       type: data.type,
     });
+
+    const chat = await this.chatsService.getChatFromMongoOrFailHttp(
+      update.chatId,
+    );
+
+    this.updatesGateway.sendUpdate(chat.firstCompanion._id, update);
+    this.updatesGateway.sendUpdate(chat.secondCompanion._id, update);
 
     return update;
   }
