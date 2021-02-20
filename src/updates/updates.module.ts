@@ -8,11 +8,13 @@ import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../config/auth.config';
 import { UpdatesGateway } from './updates.gateway';
+import { MessagesModule } from '../messages/messages.module';
 
 @Module({
   imports: [
     forwardRef(() => ChatsModule),
     forwardRef(() => UsersModule),
+    forwardRef(() => MessagesModule),
     MongooseModule.forFeature([{ name: Update.name, schema: UpdateSchema }]),
     JwtModule.registerAsync({
       useFactory: (authConfig: AuthConfigType) => ({

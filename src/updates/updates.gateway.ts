@@ -2,8 +2,10 @@ import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  ConnectedSocket,
 } from '@nestjs/websockets';
-import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import _ from 'lodash';
@@ -13,6 +15,8 @@ import { forwardRef, Inject, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UpdateDocument } from './schemas/update.schema';
 import { UpdateDto } from './dto/update.dto';
 import { MessagesService } from '../messages/messages.service';
+import { CreateMessageThroughWebSocketDto } from '../messages/dto/create-message-through-websocket.dto';
+import { Types } from 'mongoose';
 
 @WebSocketGateway({
   transports: ['websocket', 'polling'],
@@ -66,7 +70,7 @@ export class UpdatesGateway
     });
   }
 
-  @SubscribeMessage('events')
+  @SubscribeMessage('send_message')
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -74,8 +78,17 @@ export class UpdatesGateway
     }),
   )
   async sendNewMessage(
-    @MessageBody() createMessageData: CreateMessageInMongoDto,
-  ) {}
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() createMessageData: CreateMessageThroughWebSocketDto,
+  ): Promise<void> {
+    const user = (socket.request.user as RequestAuthData).user;
+
+    await this.messagesService.createMessageInMongo({
+      ...createMessageData,
+      chatId: Types.ObjectId.createFromHexString(createMessageData.chatId),
+      userId: user._id,
+    });
+  }
 
   private async authSocket(socket: Socket): Promise<void> {
     const payload = await this.jwtService.verifyAsync(
