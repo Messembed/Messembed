@@ -37,6 +37,23 @@ export class ChatsService {
       createData.companionId,
     );
 
+    const existingChat = await this.chatModel.findOne({
+      $or: [
+        {
+          'firstCompanion._id': currentUser._id,
+          'secondCompanion._id': secondCompanion._id,
+        },
+        {
+          'secondCompanion._id': currentUser._id,
+          'firstCompanion._id': secondCompanion._id,
+        },
+      ],
+    });
+
+    if (existingChat) {
+      throw ErrorGenerator.create('CHAT_ALREADY_EXISTS');
+    }
+
     const chat = await this.chatModel.create({
       _id: new Types.ObjectId(),
       createdAt: new Date(),
@@ -67,8 +84,16 @@ export class ChatsService {
     );
 
     const existingChat = await this.chatModel.findOne({
-      'firstCompanion._id': firstCompanion._id,
-      'secondCompanion._id': secondCompanion._id,
+      $or: [
+        {
+          'firstCompanion._id': firstCompanion._id,
+          'secondCompanion._id': secondCompanion._id,
+        },
+        {
+          'secondCompanion._id': firstCompanion._id,
+          'firstCompanion._id': secondCompanion._id,
+        },
+      ],
     });
 
     if (existingChat) {
