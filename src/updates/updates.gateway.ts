@@ -19,6 +19,7 @@ import { CreateMessageThroughWebSocketDto } from '../messages/dto/create-message
 import { Types } from 'mongoose';
 import { SendWritingIndicatorDto } from '../chats/dto/send-writing-indicator.dto';
 import { ChatsService } from '../chats/chats.service';
+import { MarkMessageAsReadThroughWebSocketDto } from '../messages/dto/mark-message-as-read-through-websocket.dto';
 
 @WebSocketGateway({
   transports: ['websocket', 'polling'],
@@ -126,6 +127,45 @@ export class UpdatesGateway
       ...createMessageData,
       chatId: Types.ObjectId.createFromHexString(createMessageData.chatId),
       userId: user._id,
+    });
+  }
+
+  @SubscribeMessage('mark_message_as_read')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
+  async markMessageAsRead(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() params: MarkMessageAsReadThroughWebSocketDto,
+  ): Promise<void> {
+    const authData = socket.request.user as RequestAuthData;
+
+    const {
+      chat,
+    } = await this.messagesService.markMessageAsReadConsideringAccessRights(
+      authData,
+      params,
+    );
+
+    const companionsId =
+      chat.firstCompanion._id === authData.user._id
+        ? chat.secondCompanion._id
+        : chat.firstCompanion._id;
+
+    const sockets = this.connectedSockets[companionsId];
+
+    if (!sockets) {
+      return;
+    }
+
+    sockets.forEach(socket => {
+      socket.emit('message_read', {
+        chatId: params.chatId,
+        messageId: params.messageId,
+      });
     });
   }
 

@@ -14,13 +14,22 @@ export class UpdateDto {
   @ApiProperty({ type: String })
   chatId: Types.ObjectId;
 
-  @ApiProperty({ type: String, enum: ['new_message', 'new_chat'] })
+  @ApiProperty({
+    type: String,
+    enum: ['new_message', 'new_chat'],
+  })
   type: string;
 
-  @ApiPropertyOptional({ type: () => MessageForFrontend })
+  @ApiPropertyOptional({
+    type: () => MessageForFrontend,
+    description: 'Present, if type = `new_message`',
+  })
   message?: MessageForFrontend;
 
-  @ApiPropertyOptional({ type: () => PersonalChatFromMongoDto })
+  @ApiPropertyOptional({
+    type: () => PersonalChatFromMongoDto,
+    description: 'Present, if type = `new_chat`',
+  })
   chat?: PersonalChatFromMongoDto;
 
   static fromUpdates(

@@ -8,9 +8,11 @@ import { Model, Types } from 'mongoose';
 import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
 import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
 import { MessageForFrontend } from './dto/message-for-frontend.dto';
+import { MarkMessageAsReadThroughWebSocketDto } from './dto/mark-message-as-read-through-websocket.dto';
 import { Condition } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdatesService } from '../updates/updates.service';
+import { ChatMongoDocument } from '../chats/schemas/chat.schema';
 
 @Injectable()
 export class MessagesService {
@@ -119,5 +121,43 @@ export class MessagesService {
     const messages = await messagesQuery.exec();
 
     return messages;
+  }
+
+  async markMessageAsReadConsideringAccessRights(
+    authData: RequestAuthData,
+    params: MarkMessageAsReadThroughWebSocketDto,
+  ): Promise<{ chat: ChatMongoDocument }> {
+    const chat = await this.chatsService.getChatFromMongoConsideringAccessRights(
+      Types.ObjectId.createFromHexString(params.chatId),
+      authData,
+    );
+
+    if (!chat) {
+      throw new Error('Chat not found');
+    }
+
+    const updateResult = await this.messageModel.updateOne(
+      {
+        chat: chat.id,
+        _id: params.messageId,
+        // Current user can't mark his own messages as read. You can do that only with messages
+        // of your companion. But external-service can mark any message as read.
+        ...(authData.user ? { user: { $ne: authData.user._id } } : {}),
+      },
+      {
+        $set: {
+          read: true,
+        },
+      },
+    );
+
+    console.log(
+      `markMessageAsReadConsideringAccessRights: params: ` +
+        JSON.stringify(params) +
+        `, result: ` +
+        JSON.stringify(updateResult),
+    );
+
+    return { chat };
   }
 }
