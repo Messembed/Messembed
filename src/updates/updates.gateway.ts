@@ -17,6 +17,8 @@ import { UpdateDto } from './dto/update.dto';
 import { MessagesService } from '../messages/messages.service';
 import { CreateMessageThroughWebSocketDto } from '../messages/dto/create-message-through-websocket.dto';
 import { Types } from 'mongoose';
+import { SendWritingIndicatorDto } from '../chats/dto/send-writing-indicator.dto';
+import { ChatsService } from '../chats/chats.service';
 
 @WebSocketGateway({
   transports: ['websocket', 'polling'],
@@ -29,6 +31,8 @@ export class UpdatesGateway
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => MessagesService))
     private readonly messagesService: MessagesService,
+    @Inject(forwardRef(() => ChatsService))
+    private readonly chatsService: ChatsService,
   ) {}
 
   /**
@@ -67,6 +71,41 @@ export class UpdatesGateway
 
     sockets.forEach(socket => {
       socket.emit('new_update', updateDto);
+    });
+  }
+
+  @SubscribeMessage('send_writing')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
+  async sendWritingIndicator(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() { chatId }: SendWritingIndicatorDto,
+  ): Promise<void> {
+    const user = (socket.request.user as RequestAuthData).user;
+
+    const chat = await this.chatsService.getChatFromMongoOrFailHttp(
+      Types.ObjectId.createFromHexString(chatId),
+    );
+
+    const companionsId =
+      chat.firstCompanion._id === user._id
+        ? chat.secondCompanion._id
+        : chat.firstCompanion._id;
+
+    const sockets = this.connectedSockets[companionsId];
+
+    if (!sockets) {
+      return;
+    }
+
+    sockets.forEach(socket => {
+      socket.emit('writing', {
+        chatId,
+      });
     });
   }
 
