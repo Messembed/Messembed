@@ -18,9 +18,6 @@ export class PersonalChatFromMongoDto {
   deletedAt?: Date | null;
 
   @ApiProperty()
-  title: string;
-
-  @ApiProperty()
   active: boolean;
 
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
@@ -51,7 +48,6 @@ export class PersonalChatFromMongoDto {
       createdAt: chat.createdAt,
       updatedAt: chat.updatedAt,
       deletedAt: chat.deletedAt,
-      title: chat.title,
       active: chat.active,
       externalMetadata: chat.externalMetadata,
       lastMessage: chat.lastMessage ? chat.lastMessage.toJSON() : null,

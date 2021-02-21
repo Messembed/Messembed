@@ -75,7 +75,6 @@ export class ChatsService {
       throw ErrorGenerator.create('CHAT_ALREADY_EXISTS');
     }
 
-    createDto.title = createDto.title;
     createDto.externalMetadata = createDto.externalMetadata;
     createDto.privateExternalMetadata = createDto.privateExternalMetadata;
 
@@ -85,7 +84,6 @@ export class ChatsService {
       active: true,
       firstCompanion: firstCompanion,
       secondCompanion: secondCompanion,
-      title: createDto.title,
       externalMetadata: createDto.externalMetadata,
       privateExternalMetadata: createDto.privateExternalMetadata,
     });
@@ -105,7 +103,6 @@ export class ChatsService {
   ): Promise<ChatMongoDocument> {
     const chat = await this.getChatFromMongoOrFailHttp(chatId);
 
-    chat.title = editDto.title;
     chat.externalMetadata = editDto.externalMetadata;
     chat.privateExternalMetadata = editDto.privateExternalMetadata;
 
