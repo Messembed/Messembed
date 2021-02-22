@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { Model } from 'mongoose';
@@ -7,12 +7,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
 import { PaginatedUserInMongoDto } from './dto/paginated-user-in-mongo.dto';
 import { MongoErrorCodes } from '../common/constants/mongo-error-codes.enum';
+import { ChatsService } from '../chats/chats.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserMongo.name)
     private readonly userModel: Model<UserMongoDocument>,
+    @Inject(forwardRef(() => ChatsService))
+    private readonly chatsService: ChatsService,
   ) {}
 
   async createUserInMongo(
@@ -53,6 +56,9 @@ export class UsersService {
     user.externalMetadata = editDto.externalMetadata;
     user.privateExternalMetadata = editDto.privateExternalMetadata;
     await user.save();
+
+    // TODO: after this method send update to inform users that this user has been edited
+    await this.chatsService.updateUserInChats(user);
 
     return user;
   }

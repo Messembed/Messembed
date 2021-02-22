@@ -357,4 +357,21 @@ export class ChatsService {
 
     return chatIds;
   }
+
+  async updateUserInChats(user: UserMongoDocument): Promise<void> {
+    await Promise.all([
+      this.chatModel.updateMany(
+        {
+          'firstCompanion._id': user._id,
+        },
+        { $set: { firstCompanion: user, updatedAt: new Date() } },
+      ),
+      this.chatModel.updateMany(
+        {
+          'secondCompanion._id': user._id,
+        },
+        { $set: { secondCompanion: user, updatedAt: new Date() } },
+      ),
+    ]);
+  }
 }
