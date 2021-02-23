@@ -5,10 +5,7 @@ import { ChatsModule } from '../chats/chats.module';
 import { UsersModule } from '../users/users.module';
 import { MessagesModule } from '../messages/messages.module';
 import { AuthModule } from '../auth/auth.module';
-import { GraphQLModule } from '@nestjs/graphql';
 import { AppController } from './app.controller';
-import { AppResolver } from './app.resolver';
-import { GraphqlApiModule } from '../graphql-api/graphql-api.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   MONGODB_CONFIG_KEY,
@@ -30,12 +27,7 @@ import { UpdatesModule } from '../updates/updates.module';
       inject: [MONGODB_CONFIG_KEY],
     }),
     ConfigModule.forRoot(configModuleOptions),
-    GraphQLModule.forRoot({
-      autoSchemaFile: 'schema.gql',
-    }),
-    GraphqlApiModule,
   ],
   controllers: [AppController],
-  providers: [AppResolver],
 })
 export class AppModule {}
