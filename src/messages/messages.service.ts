@@ -80,7 +80,7 @@ export class MessagesService {
     filters?: GetMessagesFromMongoFiltersDto,
     currentUserId?: string,
   ): Promise<PaginatedMessagesFromMongoDto> {
-    const messages = await this.getMessagesFromMongo(chatId, filters);
+    const messages = await this.getMessagesByChatIdFromMongo(chatId, filters);
 
     const messagesForFrontend = MessageForFrontend.fromMessages(
       messages,
@@ -93,7 +93,7 @@ export class MessagesService {
     });
   }
 
-  async getMessagesFromMongo(
+  async getMessagesByChatIdFromMongo(
     chatId: Types.ObjectId,
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<MessageMongoDocument[]> {
@@ -159,5 +159,46 @@ export class MessagesService {
     );
 
     return { chat };
+  }
+
+  async findMessagesForAdminWrapped(
+    filters?: GetMessagesFromMongoFiltersDto,
+  ): Promise<PaginatedMessagesFromMongoDto> {
+    const messages = await this.findMessagesForAdmin(filters);
+
+    const messagesForFrontend = MessageForFrontend.fromMessages(messages);
+
+    return new PaginatedMessagesFromMongoDto({
+      ...filters,
+      messages: messagesForFrontend,
+    });
+  }
+
+  async findMessagesForAdmin(
+    filters?: GetMessagesFromMongoFiltersDto,
+  ): Promise<MessageMongoDocument[]> {
+    const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)
+      ? { $gte: filters?.after }
+      : !_.isNil(filters?.before)
+      ? { $lt: filters?.before }
+      : undefined;
+
+    const messagesQuery = this.messageModel
+      .find({
+        ...(createdAtCondition ? { createdAt: createdAtCondition } : {}),
+      })
+      .sort({ createdAt: 'ASC' });
+
+    if (filters?.offset) {
+      messagesQuery.skip(filters?.offset);
+    }
+
+    if (filters?.limit) {
+      messagesQuery.limit(filters?.limit);
+    }
+
+    const messages = await messagesQuery.exec();
+
+    return messages;
   }
 }

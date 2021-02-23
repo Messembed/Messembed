@@ -67,4 +67,19 @@ export class MessagesAdminController {
       filters,
     );
   }
+
+  @Get('admin-api/messages')
+  @UseGuards(ExternalServiceAuthGuard)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
+  @ApiOkResponse({ type: () => PaginatedMessagesFromMongoDto, isArray: true })
+  async findMessages(
+    @Query() filters: GetMessagesFromMongoFiltersDto,
+  ): Promise<PaginatedMessagesFromMongoDto> {
+    return this.messagesService.findMessagesForAdminWrapped(filters);
+  }
 }
