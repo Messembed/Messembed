@@ -11,14 +11,13 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AuthData } from '../auth/decorators/auth-data.decorator';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatPathForMongoDto } from '../chats/dto/chat-path-for-mongo.dto';
 import { Types } from 'mongoose';
 import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
 import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
 import { CreateMessageAsAdminInMongoDto } from './dto/create-message-as-admin-in-mongo.dto';
+import { PaginatedMessagesForAdminDto } from './dto/paginated-messages-for-admin.dto';
 
 @Controller()
 @ApiTags('Messages')
@@ -59,10 +58,8 @@ export class MessagesAdminController {
   async getMessages(
     @Param() { chatId }: ChatPathForMongoDto,
     @Query() filters: GetMessagesFromMongoFiltersDto,
-    @AuthData() authData: RequestAuthData,
-  ): Promise<PaginatedMessagesFromMongoDto> {
-    return this.messagesService.getPaginatedMessagesFromMongoConsideringAccessRights(
-      authData,
+  ): Promise<PaginatedMessagesForAdminDto> {
+    return this.messagesService.getPaginatedMessagesForAdmin(
       Types.ObjectId(chatId),
       filters,
     );

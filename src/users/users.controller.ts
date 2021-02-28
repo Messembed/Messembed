@@ -2,9 +2,9 @@ import { Controller, Param, Get, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserPathDto } from './dto/user-path.dto';
-import { AuthData } from '../auth/decorators/auth-data.decorator';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
-import { UserAuthGuard } from '../auth/guards/user-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { UserMongoDocument } from './schemas/user.schema';
 
 @Controller()
 @ApiTags('User')
@@ -18,11 +18,9 @@ export class UsersController {
   }
 
   @Get('user')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => Object })
-  async getMe(@AuthData() authData: RequestAuthData): Promise<any> {
-    return (
-      await this.usersService.getUserFromMongo(authData.user._id)
-    ).toJSON();
+  async getMe(@CurrentUser() currentUser: UserMongoDocument): Promise<any> {
+    return (await this.usersService.getUserFromMongo(currentUser._id)).toJSON();
   }
 }

@@ -1,7 +1,6 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { CreateMessageInMongoOptions } from './interfaces/create-message-in-mongo-options.interface';
 import _ from 'lodash';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatsService } from '../chats/chats.service';
 import { MessageMongo, MessageMongoDocument } from './schemas/message.schema';
 import { Model, Types } from 'mongoose';
@@ -13,6 +12,8 @@ import { Condition } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdatesService } from '../updates/updates.service';
 import { ChatMongoDocument } from '../chats/schemas/chat.schema';
+import { PaginatedMessagesForAdminDto } from './dto/paginated-messages-for-admin.dto';
+import { ErrorGenerator } from '../common/classes/error-generator.class';
 
 @Injectable()
 export class MessagesService {
@@ -58,21 +59,31 @@ export class MessagesService {
     return message;
   }
 
-  async getPaginatedMessagesFromMongoConsideringAccessRights(
-    authData: RequestAuthData,
+  async getPaginatedMessagesForUser(
+    currentUserId: string,
     chatId: Types.ObjectId,
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<PaginatedMessagesFromMongoDto> {
-    const chat = await this.chatsService.getChatFromMongoConsideringAccessRights(
+    const chat = await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
       chatId,
-      authData,
+      currentUserId,
     );
 
-    return this.getPaginatedMessagesFromMongo(
-      chat._id,
-      filters,
-      authData.user && authData.user._id,
-    );
+    return this.getPaginatedMessagesFromMongo(chat._id, filters, currentUserId);
+  }
+
+  async getPaginatedMessagesForAdmin(
+    chatId: Types.ObjectId,
+    filters?: GetMessagesFromMongoFiltersDto,
+  ): Promise<PaginatedMessagesForAdminDto> {
+    const chat = await this.chatsService.getChatFromMongoOrFailHttp(chatId);
+
+    const messages = await this.getMessagesByChatIdFromMongo(chat._id, filters);
+
+    return new PaginatedMessagesForAdminDto({
+      ...filters,
+      messages,
+    });
   }
 
   async getPaginatedMessagesFromMongo(
@@ -124,38 +135,31 @@ export class MessagesService {
   }
 
   async markMessageAsReadConsideringAccessRights(
-    authData: RequestAuthData,
+    currentUserId: string,
     params: MarkMessageAsReadThroughWebSocketDto,
   ): Promise<{ chat: ChatMongoDocument }> {
-    const chat = await this.chatsService.getChatFromMongoConsideringAccessRights(
+    const chat = await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
       Types.ObjectId.createFromHexString(params.chatId),
-      authData,
+      currentUserId,
     );
 
     if (!chat) {
-      throw new Error('Chat not found');
+      throw ErrorGenerator.create('CHAT_NOT_FOUND');
     }
 
-    const updateResult = await this.messageModel.updateOne(
+    await this.messageModel.updateOne(
       {
         chat: chat.id,
         _id: params.messageId,
         // Current user can't mark his own messages as read. You can do that only with messages
-        // of your companion. But external-service can mark any message as read.
-        ...(authData.user ? { user: { $ne: authData.user._id } } : {}),
+        // of your companion.
+        user: { $ne: currentUserId },
       },
       {
         $set: {
           read: true,
         },
       },
-    );
-
-    console.log(
-      `markMessageAsReadConsideringAccessRights: params: ` +
-        JSON.stringify(params) +
-        `, result: ` +
-        JSON.stringify(updateResult),
     );
 
     return { chat };

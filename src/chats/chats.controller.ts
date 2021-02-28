@@ -13,15 +13,14 @@ import {
 } from '@nestjs/common';
 import { ChatsService } from './chats.service';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AuthData } from '../auth/decorators/auth-data.decorator';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatsQueryDto } from './dto/chats-query.dto';
-import { UserAuthGuard } from '../auth/guards/user-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
 import { Types } from 'mongoose';
 import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
 import { UserMongoDocument } from '../users/schemas/user.schema';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller()
 @ApiTags('Chat')
@@ -35,52 +34,52 @@ export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
   @Post('user/personal-chats')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => PersonalChatFromMongoDto })
   async createPersonalChat(
     @Body() createData: CreatePersonalChatDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto> {
-    return this.chatsService.createPersonalChat(authData.user._id, createData);
+    return this.chatsService.createPersonalChat(currentUser._id, createData);
   }
 
   @Get('user/personal-chats')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => Object, isArray: true })
   async getPersonalChats(
     @Query() query: ChatsQueryDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto[]> {
     return this.chatsService.getPersonalChatsFromMongoOfUser(
-      authData.user._id,
+      currentUser._id,
       query,
     );
   }
 
   @Get('user/personal-chats/:chatId')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => Object })
   async getPersonalChat(
     @Param() { chatId }: ChatPathForMongoDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto> {
     return this.chatsService.getPersonalChatOfUserFromMongoOrFailHttp(
-      (authData.user as UserMongoDocument)._id,
+      currentUser._id,
       new Types.ObjectId(chatId),
     );
   }
 
   @Post('user/personal-chats/:chatId/read-status')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => Object })
   @UseInterceptors(ClassSerializerInterceptor)
   async setRead(
     @Param() { chatId }: ChatPathForMongoDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto> {
     return this.chatsService.readPersonalChatInMongoAsUser(
       new Types.ObjectId(chatId),
-      (authData.user as UserMongoDocument)._id,
+      currentUser._id,
     );
   }
 }

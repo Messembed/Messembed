@@ -10,18 +10,16 @@ export const configModuleOptions: ConfigModuleOptions = {
     PORT: Joi.number()
       .port()
       .required(),
-    HOST: Joi.string().required(),
-    APP_URL: Joi.string().required(),
+    HOST: Joi.string()
+      .optional()
+      .default('127.0.0.1'),
 
-    EXTERNAL_SERVICE_CALLBACK_URL: Joi.string()
+    AUTH__EXTERNAL_SERVICE__PASSWORD: Joi.string().required(),
+    AUTH__JWT_STRATEGY__JWT_SECRET: Joi.string().required(),
+
+    MONGODB_URI: Joi.string()
       .uri()
       .required(),
-
-    AUTH__EXTERNAL_SERVICE__PASSWORD: Joi.string().optional(),
-    AUTH__COOKIES_STRATEGY__VERIFY_URL: Joi.string().optional(),
-    AUTH__JWT_STRATEGY__JWT_SECRET: Joi.string().optional(),
-
-    MONGODB_URI: Joi.string().uri().required(),
   }),
   load: [appConfig, authConfig, mongodbConfig],
 };

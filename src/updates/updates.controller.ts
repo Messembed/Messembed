@@ -7,9 +7,9 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
-import { AuthData } from '../auth/decorators/auth-data.decorator';
-import { UserAuthGuard } from '../auth/guards/user-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserMongoDocument } from '../users/schemas/user.schema';
 import { GetUpdatesRequestDto } from './dto/get-updates-request.dto';
 import { UpdateDto } from './dto/update.dto';
 import { UpdatesService } from './updates.service';
@@ -22,8 +22,9 @@ export class UpdatesController {
   @Get()
   @ApiOkResponse({
     type: () => UpdateDto,
+    isArray: true,
   })
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -32,10 +33,10 @@ export class UpdatesController {
   )
   async getUpdates(
     @Query() filters: GetUpdatesRequestDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<UpdateDto[]> {
     const updates = await this.updatesService.getUpdatesForUser(
-      authData.user._id,
+      currentUser._id,
       filters.creationDateOfLastFetchedUpdate,
     );
 

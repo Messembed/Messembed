@@ -2,9 +2,9 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Inject } from '@nestjs/common';
 import { JwtAuthTokenPayload } from '../interfaces/jwt-auth-token-payload.interface';
-import { RequestAuthData } from '../classes/request-auth-data.class';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../../config/auth.config';
 import { UsersService } from '../../users/users.service';
+import { UserMongoDocument } from '../../users/schemas/user.schema';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -20,15 +20,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtAuthTokenPayload): Promise<RequestAuthData> {
+  async validate(payload: JwtAuthTokenPayload): Promise<UserMongoDocument> {
     const user = await this.usersService.findOneUserFromMongoOrFail(
       payload.sub,
     );
 
-    return new RequestAuthData({
-      user,
-      externalService: null,
-      isExternalService: false,
-    });
+    return user;
   }
 }

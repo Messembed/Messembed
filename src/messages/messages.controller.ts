@@ -11,14 +11,14 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { AuthData } from '../auth/decorators/auth-data.decorator';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatPathForMongoDto } from '../chats/dto/chat-path-for-mongo.dto';
 import { CreateMessageInMongoDto } from './dto/create-message-in-mongo.dto';
 import { Types } from 'mongoose';
 import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
 import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
-import { UserAuthGuard } from '../auth/guards/user-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { UserMongoDocument } from '../users/schemas/user.schema';
 
 @Controller()
 @ApiTags('Messages')
@@ -35,18 +35,18 @@ export class MessagesController {
       transform: true,
     }),
   )
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiCreatedResponse({ type: () => Object })
   async createMessage(
     @Param() { chatId }: ChatPathForMongoDto,
     @Body() createDto: CreateMessageInMongoDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<any> {
     return (
       await this.messagesService.createMessageInMongo({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
-        userId: authData.user._id,
+        userId: currentUser._id,
       })
     ).toJSON();
   }
@@ -55,7 +55,7 @@ export class MessagesController {
    * @todo we need to remove external service auth strategy, as we have special MessagesAdminController
    */
   @Get('chats/:chatId/messages')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @UsePipes(
     new ValidationPipe({
       whitelist: true,
@@ -66,10 +66,10 @@ export class MessagesController {
   async getMessages(
     @Param() { chatId }: ChatPathForMongoDto,
     @Query() filters: GetMessagesFromMongoFiltersDto,
-    @AuthData() authData: RequestAuthData,
+    @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PaginatedMessagesFromMongoDto> {
-    return this.messagesService.getPaginatedMessagesFromMongoConsideringAccessRights(
-      authData,
+    return this.messagesService.getPaginatedMessagesForUser(
+      currentUser._id,
       Types.ObjectId(chatId),
       filters,
     );

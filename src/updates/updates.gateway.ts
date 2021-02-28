@@ -7,7 +7,6 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import _ from 'lodash';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -20,6 +19,7 @@ import { Types } from 'mongoose';
 import { SendWritingIndicatorDto } from '../chats/dto/send-writing-indicator.dto';
 import { ChatsService } from '../chats/chats.service';
 import { MarkMessageAsReadThroughWebSocketDto } from '../messages/dto/mark-message-as-read-through-websocket.dto';
+import { UserMongoDocument } from '../users/schemas/user.schema';
 
 @WebSocketGateway({
   transports: ['websocket', 'polling'],
@@ -44,7 +44,7 @@ export class UpdatesGateway
   async handleConnection(socket: Socket): Promise<void> {
     await this.authSocket(socket);
 
-    const user = (socket.request.user as RequestAuthData).user;
+    const user = socket.request.user as UserMongoDocument;
 
     if (this.connectedSockets[user._id]) {
       this.connectedSockets[user._id].push(socket);
@@ -54,7 +54,7 @@ export class UpdatesGateway
   }
 
   handleDisconnect(socket: Socket): void {
-    const user = (socket.request.user as RequestAuthData).user;
+    const user = socket.request.user as UserMongoDocument;
 
     if (this.connectedSockets[user._id]) {
       _.pull(this.connectedSockets[user._id], socket);
@@ -86,7 +86,7 @@ export class UpdatesGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() { chatId }: SendWritingIndicatorDto,
   ): Promise<void> {
-    const user = (socket.request.user as RequestAuthData).user;
+    const user = socket.request.user as UserMongoDocument;
 
     const chat = await this.chatsService.getChatFromMongoOrFailHttp(
       Types.ObjectId.createFromHexString(chatId),
@@ -121,7 +121,7 @@ export class UpdatesGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() createMessageData: CreateMessageThroughWebSocketDto,
   ): Promise<void> {
-    const user = (socket.request.user as RequestAuthData).user;
+    const user = socket.request.user as UserMongoDocument;
 
     await this.messagesService.createMessageInMongo({
       ...createMessageData,
@@ -141,17 +141,17 @@ export class UpdatesGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() params: MarkMessageAsReadThroughWebSocketDto,
   ): Promise<void> {
-    const authData = socket.request.user as RequestAuthData;
+    const user = socket.request.user as UserMongoDocument;
 
     const {
       chat,
     } = await this.messagesService.markMessageAsReadConsideringAccessRights(
-      authData,
+      user._id,
       params,
     );
 
     const companionsId =
-      chat.firstCompanion._id === authData.user._id
+      chat.firstCompanion._id === user._id
         ? chat.secondCompanion._id
         : chat.firstCompanion._id;
 
@@ -177,10 +177,6 @@ export class UpdatesGateway
       payload.sub,
     );
 
-    socket.request.user = new RequestAuthData({
-      externalService: null,
-      isExternalService: false,
-      user,
-    });
+    socket.request.user = user;
   }
 }

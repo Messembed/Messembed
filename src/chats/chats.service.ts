@@ -1,7 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { EditChatDto } from './dto/edit-chat.dto';
-import { RequestAuthData } from '../auth/classes/request-auth-data.class';
 import { ChatsQueryDto } from './dto/chats-query.dto';
 import { Model, Types } from 'mongoose';
 import { ChatMongo, ChatMongoDocument } from './schemas/chat.schema';
@@ -215,33 +214,6 @@ export class ChatsService {
     const personalChat = PersonalChatFromMongoDto.createFromChat(chat, userId);
 
     return personalChat;
-  }
-
-  /**
-   * Находит чат по его идентификатору.
-   * Так же проверяет права доступа к этому
-   * чату учитывая переданный RequestAuthData.
-   * Если нет чата с таким идентификатором, или
-   * данный клиент не имеет права доступа к этому чату,
-   * то выбрасывается ошибка HttpException.
-   *
-   * Данный клиент имеет права доступа к этому чату
-   * если он:
-   * 1. является external service-ом, или;
-   * 2. является участником чата.
-   */
-  async getChatFromMongoConsideringAccessRights(
-    chatId: Types.ObjectId,
-    authData: RequestAuthData,
-  ): Promise<ChatMongoDocument> {
-    const chat = authData.isExternalService
-      ? await this.getChatFromMongoOrFailHttp(chatId)
-      : await this.findChatByIdAndCompanionInMongoOrFailHttp(
-          chatId,
-          (authData.user as UserMongoDocument)._id,
-        );
-
-    return chat;
   }
 
   /**
