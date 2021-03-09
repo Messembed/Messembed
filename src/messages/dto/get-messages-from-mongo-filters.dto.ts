@@ -1,4 +1,4 @@
-import { IsDate, IsInt, IsOptional } from 'class-validator';
+import { IsBoolean, IsDate, IsInt, IsOptional } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { TransformInt } from '../../common/utils/transform-int.util';
@@ -27,4 +27,10 @@ export class GetMessagesFromMongoFiltersDto {
   @IsInt()
   @IsOptional()
   limit?: number;
+
+  @ApiPropertyOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  @IsOptional()
+  read?: boolean;
 }

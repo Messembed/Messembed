@@ -118,6 +118,7 @@ export class MessagesService {
       .find({
         chat: chatId,
         ...(createdAtCondition ? { createdAt: createdAtCondition } : {}),
+        ...(!_.isNil(filters.read) ? { read: filters.read } : {}),
       })
       .sort({ createdAt: 'ASC' });
 

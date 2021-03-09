@@ -1,0 +1,29 @@
+version: '3'
+services:
+  messembed:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+    env_file: ./.env
+    ports:
+      - '127.0.0.1:3001:80'
+    restart: unless-stopped
+    networks:
+      default: null
+      github-messenger: null
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    ports:
+      - 127.0.0.1:27017:27017
+    volumes:
+      - /data/messembed/mongo/data/db:/data/db
+    restart: unless-stopped
+
+networks:
+  github-messenger: null
