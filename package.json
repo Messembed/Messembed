@@ -40,7 +40,7 @@
     "@nestjs/platform-socket.io": "^7.6.12",
     "@nestjs/swagger": "^4.5.11",
     "@nestjs/websockets": "^7.6.12",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.12.2",
     "dotenv": "^8.2.0",
