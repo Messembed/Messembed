@@ -50,10 +50,7 @@ export class ChatsController {
     @Query() query: ChatsQueryDto,
     @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto[]> {
-    return this.chatsService.getPersonalChatsFromMongoOfUser(
-      currentUser._id,
-      query,
-    );
+    return this.chatsService.getPersonalChatsOfUser(currentUser._id, query);
   }
 
   @Get('user/personal-chats/:chatId')
@@ -63,7 +60,7 @@ export class ChatsController {
     @Param() { chatId }: ChatPathForMongoDto,
     @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto> {
-    return this.chatsService.getPersonalChatOfUserFromMongoOrFailHttp(
+    return this.chatsService.getPersonalChatOfUserOrFailHttp(
       currentUser._id,
       new Types.ObjectId(chatId),
     );
@@ -77,7 +74,7 @@ export class ChatsController {
     @Param() { chatId }: ChatPathForMongoDto,
     @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<PersonalChatFromMongoDto> {
-    return this.chatsService.readPersonalChatInMongoAsUser(
+    return this.chatsService.readPersonalChatAsUser(
       new Types.ObjectId(chatId),
       currentUser._id,
     );

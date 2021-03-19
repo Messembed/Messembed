@@ -88,7 +88,7 @@ export class UpdatesGateway
   ): Promise<void> {
     const user = socket.request.user as UserMongoDocument;
 
-    const chat = await this.chatsService.getChatFromMongoOrFailHttp(
+    const chat = await this.chatsService.getChatByIdOrFailHttp(
       Types.ObjectId.createFromHexString(chatId),
     );
 
@@ -123,7 +123,7 @@ export class UpdatesGateway
   ): Promise<void> {
     const user = socket.request.user as UserMongoDocument;
 
-    await this.messagesService.createMessageInMongo({
+    await this.messagesService.createMessage({
       ...createMessageData,
       chatId: Types.ObjectId.createFromHexString(createMessageData.chatId),
       userId: user._id,
@@ -173,9 +173,7 @@ export class UpdatesGateway
     const payload = await this.jwtService.verifyAsync(
       socket.handshake.query.token,
     );
-    const user = await this.usersService.findOneUserFromMongoOrFail(
-      payload.sub,
-    );
+    const user = await this.usersService.getUserByIdOrFail(payload.sub);
 
     socket.request.user = user;
   }

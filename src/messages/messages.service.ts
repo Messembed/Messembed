@@ -26,10 +26,10 @@ export class MessagesService {
     private readonly messageModel: Model<MessageMongoDocument>,
   ) {}
 
-  async createMessageInMongo(
+  async createMessage(
     options: CreateMessageInMongoOptions,
   ): Promise<MessageMongoDocument> {
-    const chat = await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
+    const chat = await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       options.chatId,
       options.userId,
     );
@@ -64,34 +64,12 @@ export class MessagesService {
     chatId: Types.ObjectId,
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<PaginatedMessagesFromMongoDto> {
-    const chat = await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
+    await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       chatId,
       currentUserId,
     );
 
-    return this.getPaginatedMessagesFromMongo(chat._id, filters, currentUserId);
-  }
-
-  async getPaginatedMessagesForAdmin(
-    chatId: Types.ObjectId,
-    filters?: GetMessagesFromMongoFiltersDto,
-  ): Promise<PaginatedMessagesForAdminDto> {
-    const chat = await this.chatsService.getChatFromMongoOrFailHttp(chatId);
-
-    const messages = await this.getMessagesByChatIdFromMongo(chat._id, filters);
-
-    return new PaginatedMessagesForAdminDto({
-      ...filters,
-      messages,
-    });
-  }
-
-  async getPaginatedMessagesFromMongo(
-    chatId: Types.ObjectId,
-    filters?: GetMessagesFromMongoFiltersDto,
-    currentUserId?: string,
-  ): Promise<PaginatedMessagesFromMongoDto> {
-    const messages = await this.getMessagesByChatIdFromMongo(chatId, filters);
+    const messages = await this.getMessagesByChatId(chatId, filters);
 
     const messagesForFrontend = MessageForFrontend.fromMessages(
       messages,
@@ -104,7 +82,21 @@ export class MessagesService {
     });
   }
 
-  async getMessagesByChatIdFromMongo(
+  async getPaginatedMessagesForAdmin(
+    chatId: Types.ObjectId,
+    filters?: GetMessagesFromMongoFiltersDto,
+  ): Promise<PaginatedMessagesForAdminDto> {
+    const chat = await this.chatsService.getChatByIdOrFailHttp(chatId);
+
+    const messages = await this.getMessagesByChatId(chat._id, filters);
+
+    return new PaginatedMessagesForAdminDto({
+      ...filters,
+      messages,
+    });
+  }
+
+  async getMessagesByChatId(
     chatId: Types.ObjectId,
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<MessageMongoDocument[]> {
@@ -139,7 +131,7 @@ export class MessagesService {
     currentUserId: string,
     params: MarkMessageAsReadThroughWebSocketDto,
   ): Promise<{ chat: ChatMongoDocument }> {
-    const chat = await this.chatsService.findChatByIdAndCompanionInMongoOrFailHttp(
+    const chat = await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       Types.ObjectId.createFromHexString(params.chatId),
       currentUserId,
     );
@@ -166,10 +158,10 @@ export class MessagesService {
     return { chat };
   }
 
-  async findMessagesForAdminWrapped(
+  async getAllMessagesForAdminWrapped(
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<PaginatedMessagesFromMongoDto> {
-    const messages = await this.findMessagesForAdmin(filters);
+    const messages = await this.getAllMessagesForAdmin(filters);
 
     const messagesForFrontend = MessageForFrontend.fromMessages(messages);
 
@@ -179,7 +171,7 @@ export class MessagesService {
     });
   }
 
-  async findMessagesForAdmin(
+  async getAllMessagesForAdmin(
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<MessageMongoDocument[]> {
     const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)

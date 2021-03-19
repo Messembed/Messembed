@@ -33,7 +33,7 @@ export class ChatsAdminController {
   @ApiCreatedResponse({ type: () => Object })
   @UseGuards(ExternalServiceAuthGuard)
   async createChat(@Body() createDto: CreateChatDto): Promise<any> {
-    return (await this.chatsService.createChatInMongo(createDto)).toJSON();
+    return (await this.chatsService.createChat(createDto)).toJSON();
   }
 
   @Patch('admin-api/chats/:chatId')
@@ -44,10 +44,7 @@ export class ChatsAdminController {
     @Body() editDto: EditChatDto,
   ): Promise<any> {
     return (
-      await this.chatsService.editChatInMongo(
-        new Types.ObjectId(chatId),
-        editDto,
-      )
+      await this.chatsService.editChat(new Types.ObjectId(chatId), editDto)
     ).toJSON();
   }
 
@@ -56,9 +53,7 @@ export class ChatsAdminController {
   @ApiOkResponse({ type: () => Object })
   async getChat(@Param() { chatId }: ChatPathForMongoDto): Promise<any> {
     return (
-      await this.chatsService.getChatFromMongoOrFailHttp(
-        new Types.ObjectId(chatId),
-      )
+      await this.chatsService.getChatByIdOrFailHttp(new Types.ObjectId(chatId))
     ).toJSON();
   }
 
@@ -66,6 +61,6 @@ export class ChatsAdminController {
   @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => PaginatedChatsInMongoDto })
   async getAllChats(): Promise<PaginatedChatsInMongoDto> {
-    return this.chatsService.getAllChatsFromMongo();
+    return this.chatsService.getAllChats();
   }
 }

@@ -14,13 +14,13 @@ export class UsersController {
   @Get('users/:userId')
   @ApiOkResponse({ type: () => Object })
   async getUser(@Param() { userId }: UserPathDto): Promise<any> {
-    return (await this.usersService.getUserFromMongo(userId)).toJSON();
+    return (await this.usersService.getUser(userId)).toJSON();
   }
 
   @Get('user')
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: () => Object })
   async getMe(@CurrentUser() currentUser: UserMongoDocument): Promise<any> {
-    return (await this.usersService.getUserFromMongo(currentUser._id)).toJSON();
+    return (await this.usersService.getUser(currentUser._id)).toJSON();
   }
 }

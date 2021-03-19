@@ -43,7 +43,7 @@ export class MessagesController {
     @CurrentUser() currentUser: UserMongoDocument,
   ): Promise<any> {
     return (
-      await this.messagesService.createMessageInMongo({
+      await this.messagesService.createMessage({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
         userId: currentUser._id,

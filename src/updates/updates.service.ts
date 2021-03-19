@@ -47,9 +47,7 @@ export class UpdatesService {
       type: data.type,
     });
 
-    const chat = await this.chatsService.getChatFromMongoOrFailHttp(
-      update.chatId,
-    );
+    const chat = await this.chatsService.getChatByIdOrFailHttp(update.chatId);
 
     this.updatesGateway.sendUpdate(chat.firstCompanion._id, update);
     this.updatesGateway.sendUpdate(chat.secondCompanion._id, update);

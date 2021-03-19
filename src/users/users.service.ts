@@ -18,9 +18,7 @@ export class UsersService {
     private readonly chatsService: ChatsService,
   ) {}
 
-  async createUserInMongo(
-    createDto: CreateUserDto,
-  ): Promise<UserMongoDocument> {
+  async createUser(createDto: CreateUserDto): Promise<UserMongoDocument> {
     try {
       const user = await this.userModel.create({
         _id: createDto.id,
@@ -40,7 +38,7 @@ export class UsersService {
     }
   }
 
-  async editUserInMongo(
+  async editUser(
     userId: string,
     editDto: EditUserDto,
   ): Promise<UserMongoDocument> {
@@ -63,7 +61,7 @@ export class UsersService {
     return user;
   }
 
-  async getUserFromMongo(userId: string): Promise<UserMongoDocument> {
+  async getUser(userId: string): Promise<UserMongoDocument> {
     const user = await this.userModel.findOne({
       _id: userId,
       deletedAt: null,
@@ -76,23 +74,19 @@ export class UsersService {
     return user;
   }
 
-  async findAllUsersFromMongo(): Promise<PaginatedUserInMongoDto> {
+  async getAllUsers(): Promise<PaginatedUserInMongoDto> {
     const users = await this.userModel.find({ deletedAt: null });
     const totalCount = await this.userModel.count({ deletedAt: null });
 
     return new PaginatedUserInMongoDto(users, totalCount);
   }
 
-  async findOneUserFromMongoOrFail(userId: string): Promise<UserMongoDocument> {
+  async getUserByIdOrFail(userId: string): Promise<UserMongoDocument> {
     const user = await this.userModel.findOne({ _id: userId });
     if (!user) {
       throw new Error(`User not found with id ${userId}`);
     }
 
     return user;
-  }
-
-  async findOneUserById(userId: string): Promise<UserMongoDocument> {
-    return this.userModel.findOne({ _id: userId });
   }
 }

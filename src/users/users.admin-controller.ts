@@ -24,7 +24,7 @@ export class UsersAdminController {
   @UseGuards(ExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => Object })
   async createUser(@Body() createDto: CreateUserDto): Promise<any> {
-    return (await this.usersService.createUserInMongo(createDto)).toJSON();
+    return (await this.usersService.createUser(createDto)).toJSON();
   }
 
   @Patch('admin-api/users/:userId')
@@ -34,13 +34,13 @@ export class UsersAdminController {
     @Param() { userId }: UserPathDto,
     @Body() editDto: EditUserDto,
   ): Promise<any> {
-    return (await this.usersService.editUserInMongo(userId, editDto)).toJSON();
+    return (await this.usersService.editUser(userId, editDto)).toJSON();
   }
 
   @Get('admin-api/users')
   @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => PaginatedUserInMongoDto })
   async findUsers(): Promise<PaginatedUserInMongoDto> {
-    return this.usersService.findAllUsersFromMongo();
+    return this.usersService.getAllUsers();
   }
 }

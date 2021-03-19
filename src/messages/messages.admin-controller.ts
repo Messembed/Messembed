@@ -38,7 +38,7 @@ export class MessagesAdminController {
     @Body() createDto: CreateMessageAsAdminInMongoDto,
   ): Promise<any> {
     return (
-      await this.messagesService.createMessageInMongo({
+      await this.messagesService.createMessage({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
         userId: createDto.userId,
@@ -77,6 +77,6 @@ export class MessagesAdminController {
   async findMessages(
     @Query() filters: GetMessagesFromMongoFiltersDto,
   ): Promise<PaginatedMessagesFromMongoDto> {
-    return this.messagesService.findMessagesForAdminWrapped(filters);
+    return this.messagesService.getAllMessagesForAdminWrapped(filters);
   }
 }

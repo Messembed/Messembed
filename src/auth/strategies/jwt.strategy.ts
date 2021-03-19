@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtAuthTokenPayload): Promise<UserMongoDocument> {
-    const user = await this.usersService.findOneUserFromMongoOrFail(
+    const user = await this.usersService.getUserByIdOrFail(
       payload.sub,
     );
 

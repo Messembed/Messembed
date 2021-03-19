@@ -29,10 +29,10 @@ export class ChatsService {
     currentUserId: string,
     createData: CreatePersonalChatDto,
   ): Promise<PersonalChatFromMongoDto> {
-    const currentUser = await this.usersService.findOneUserFromMongoOrFail(
+    const currentUser = await this.usersService.getUserByIdOrFail(
       currentUserId,
     );
-    const secondCompanion = await this.usersService.findOneUserFromMongoOrFail(
+    const secondCompanion = await this.usersService.getUserByIdOrFail(
       createData.companionId,
     );
 
@@ -72,13 +72,11 @@ export class ChatsService {
     return PersonalChatFromMongoDto.createFromChat(chat, currentUser._id);
   }
 
-  async createChatInMongo(
-    createDto: CreateChatDto,
-  ): Promise<ChatMongoDocument> {
-    const firstCompanion = await this.usersService.getUserFromMongo(
+  async createChat(createDto: CreateChatDto): Promise<ChatMongoDocument> {
+    const firstCompanion = await this.usersService.getUser(
       createDto.firstCompanionId,
     );
-    const secondCompanion = await this.usersService.getUserFromMongo(
+    const secondCompanion = await this.usersService.getUser(
       createDto.secondCompanionId,
     );
 
@@ -121,11 +119,11 @@ export class ChatsService {
     return chat;
   }
 
-  async editChatInMongo(
+  async editChat(
     chatId: Types.ObjectId,
     editDto: EditChatDto,
   ): Promise<ChatMongoDocument> {
-    const chat = await this.getChatFromMongoOrFailHttp(chatId);
+    const chat = await this.getChatByIdOrFailHttp(chatId);
 
     chat.externalMetadata = editDto.externalMetadata;
     chat.privateExternalMetadata = editDto.privateExternalMetadata;
@@ -135,7 +133,7 @@ export class ChatsService {
     return chat;
   }
 
-  async getChatFromMongoOrFailHttp(
+  async getChatByIdOrFailHttp(
     chatId: Types.ObjectId,
   ): Promise<ChatMongoDocument> {
     const chat = await this.chatModel.findOne({ _id: chatId, deletedAt: null });
@@ -147,7 +145,7 @@ export class ChatsService {
     return chat;
   }
 
-  async getAllChatsFromMongo(): Promise<PaginatedChatsInMongoDto> {
+  async getAllChats(): Promise<PaginatedChatsInMongoDto> {
     const chats = await this.chatModel.find({ deletedAt: null });
     const totalCount = await this.chatModel.count({ deletedAt: null });
 
@@ -160,7 +158,7 @@ export class ChatsService {
    * Но, этот метод возвращает не чистых представителей класса Chat,
    * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
    */
-  async getPersonalChatsFromMongoOfUser(
+  async getPersonalChatsOfUser(
     userId: string,
     query?: ChatsQueryDto,
   ): Promise<PersonalChatFromMongoDto[]> {
@@ -196,7 +194,7 @@ export class ChatsService {
    * предназначен для получения одного конкретного чата.
    * Если чат не найден, то выбрасывается ошибка HttpException
    */
-  async getPersonalChatOfUserFromMongoOrFailHttp(
+  async getPersonalChatOfUserOrFailHttp(
     userId: string,
     chatId: Types.ObjectId,
   ): Promise<PersonalChatFromMongoDto> {
@@ -221,7 +219,7 @@ export class ChatsService {
    * одного из собеседников в этом чате. Если не находит,
    * то выбрасывает HttpException
    */
-  async findChatByIdAndCompanionInMongoOrFailHttp(
+  async getChatByIdAndCompanionOrFailHttp(
     chatId: Types.ObjectId,
     userId: string,
   ): Promise<ChatMongoDocument> {
@@ -250,7 +248,7 @@ export class ChatsService {
    * и MessagesService#readMessagesAsUser, с единственным
    * отличием - она возвращает PersonalChat
    */
-  async readPersonalChatInMongoAsUser(
+  async readPersonalChatAsUser(
     chatId: Types.ObjectId,
     userId: string,
   ): Promise<PersonalChatFromMongoDto> {
