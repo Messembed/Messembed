@@ -12,6 +12,9 @@ import {
   MongoDBConfigType,
 } from '../config/mongodb.config';
 import { UpdatesModule } from '../updates/updates.module';
+import { LoggerModule } from 'nestjs-pino';
+import { IncomingMessage } from 'http';
+import { v4 as uuidv4 } from 'uuid';
 
 @Module({
   imports: [
@@ -20,6 +23,14 @@ import { UpdatesModule } from '../updates/updates.module';
     UsersModule,
     MessagesModule,
     UpdatesModule,
+    LoggerModule.forRoot({
+      pinoHttp: {
+        genReqId(req: IncomingMessage): string {
+          return (req.headers['x-request-id'] as string) || uuidv4();
+        },
+        prettyPrint: process.env.NODE_ENV !== 'production',
+      },
+    }),
     MongooseModule.forRootAsync({
       useFactory: (mongodbConfig: MongoDBConfigType) => ({
         uri: mongodbConfig.uri,
