@@ -14,10 +14,13 @@ import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
 import _ from 'lodash';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { UpdatesService } from '../updates/updates.service';
+import { APP_CONFIG_KEY, AppConfigType } from '../config/app.config';
 
 @Injectable()
 export class ChatsService {
   constructor(
+    @Inject(APP_CONFIG_KEY)
+    private readonly appConfigs: AppConfigType,
     @InjectModel(ChatMongo.name)
     private readonly chatModel: Model<ChatMongoDocument>,
     @Inject(forwardRef(() => UpdatesService))
@@ -29,6 +32,10 @@ export class ChatsService {
     currentUserId: string,
     createData: CreatePersonalChatDto,
   ): Promise<PersonalChatFromMongoDto> {
+    if (!this.appConfigs.disallowUsersToCreateChats) {
+      throw ErrorGenerator.create('CHAT_CREATION_IS_DISALLOWED');
+    }
+
     const currentUser = await this.usersService.getUserByIdOrFail(
       currentUserId,
     );

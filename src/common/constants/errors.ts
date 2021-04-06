@@ -10,4 +10,5 @@ export const errors = {
   USER_ID_IS_NOT_UNIQUE: HttpStatus.CONFLICT,
 
   CHAT_ALREADY_EXISTS: HttpStatus.CONFLICT,
+  CHAT_CREATION_IS_DISALLOWED: HttpStatus.UNAUTHORIZED,
 };
