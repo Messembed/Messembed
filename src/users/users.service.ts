@@ -8,6 +8,7 @@ import { ErrorGenerator } from '../common/classes/error-generator.class';
 import { PaginatedUserInMongoDto } from './dto/paginated-user-in-mongo.dto';
 import { MongoErrorCodes } from '../common/constants/mongo-error-codes.enum';
 import { ChatsService } from '../chats/chats.service';
+import _ from 'lodash';
 
 @Injectable()
 export class UsersService {
@@ -51,8 +52,14 @@ export class UsersService {
       throw ErrorGenerator.create('USER_NOT_FOUND');
     }
 
-    user.externalMetadata = editDto.externalMetadata;
-    user.privateExternalMetadata = editDto.privateExternalMetadata;
+    if (!_.isNil(editDto.externalMetadata)) {
+      user.externalMetadata = editDto.externalMetadata;
+    }
+
+    if (!_.isNil(editDto.privateExternalMetadata)) {
+      user.privateExternalMetadata = editDto.privateExternalMetadata;
+    }
+
     await user.save();
 
     // TODO: after this method send update to inform users that this user has been edited
