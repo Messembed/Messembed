@@ -1,7 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsObject } from 'class-validator';
+import { IsOptional, IsObject, IsBoolean } from 'class-validator';
 
 export class EditChatDto {
+  @ApiPropertyOptional()
+  @IsBoolean()
+  @IsOptional()
+  active?: boolean;
+
   @ApiPropertyOptional()
   @IsObject()
   @IsOptional()

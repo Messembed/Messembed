@@ -10,7 +10,7 @@ import { ErrorGenerator } from '../common/classes/error-generator.class';
 import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 import { MessageMongoDocument } from '../messages/schemas/message.schema';
 import { UserMongoDocument } from '../users/schemas/user.schema';
-import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
+import { PersonalChatDto } from './dto/personal-chat-from-mongo.dto';
 import _ from 'lodash';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { UpdatesService } from '../updates/updates.service';
@@ -31,7 +31,7 @@ export class ChatsService {
   async createPersonalChat(
     currentUserId: string,
     createData: CreatePersonalChatDto,
-  ): Promise<PersonalChatFromMongoDto> {
+  ): Promise<PersonalChatDto> {
     if (!this.appConfigs.disallowUsersToCreateChats) {
       throw ErrorGenerator.create('CHAT_CREATION_IS_DISALLOWED');
     }
@@ -76,7 +76,7 @@ export class ChatsService {
       chat,
     });
 
-    return PersonalChatFromMongoDto.createFromChat(chat, currentUser._id);
+    return PersonalChatDto.createFromChat(chat, currentUser._id);
   }
 
   async createChat(createDto: CreateChatDto): Promise<ChatMongoDocument> {
@@ -132,8 +132,17 @@ export class ChatsService {
   ): Promise<ChatMongoDocument> {
     const chat = await this.getChatByIdOrFailHttp(chatId);
 
-    chat.externalMetadata = editDto.externalMetadata;
-    chat.privateExternalMetadata = editDto.privateExternalMetadata;
+    if (!_.isNil(editDto.externalMetadata)) {
+      chat.externalMetadata = editDto.externalMetadata;
+    }
+
+    if (!_.isNil(editDto.privateExternalMetadata)) {
+      chat.privateExternalMetadata = editDto.privateExternalMetadata;
+    }
+
+    if (!_.isNil(editDto.active)) {
+      chat.active = editDto.active;
+    }
 
     await chat.save();
 
@@ -152,7 +161,7 @@ export class ChatsService {
     return chat;
   }
 
-  async getAllChats(): Promise<PaginatedChatsInMongoDto> {
+  async listAllChats(): Promise<PaginatedChatsInMongoDto> {
     const chats = await this.chatModel.find({ deletedAt: null });
     const totalCount = await this.chatModel.count({ deletedAt: null });
 
@@ -165,10 +174,10 @@ export class ChatsService {
    * Но, этот метод возвращает не чистых представителей класса Chat,
    * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
    */
-  async getPersonalChatsOfUser(
+  async listPersonalChatsOfUser(
     userId: string,
     query?: ChatsQueryDto,
-  ): Promise<PersonalChatFromMongoDto[]> {
+  ): Promise<PersonalChatDto[]> {
     const externalMetadataFilters: Record<string, unknown> =
       query && query.externalMetadata
         ? _.mapKeys(
@@ -179,6 +188,7 @@ export class ChatsService {
 
     const chats = await this.chatModel
       .find({
+        active: true,
         $or: [
           { 'firstCompanion._id': userId },
           { 'secondCompanion._id': userId },
@@ -187,10 +197,7 @@ export class ChatsService {
       })
       .sort({ 'lastMessage.createdAt': 'desc' });
 
-    const personalChats = PersonalChatFromMongoDto.createFromChats(
-      chats,
-      userId,
-    );
+    const personalChats = PersonalChatDto.createFromChats(chats, userId);
 
     return personalChats;
   }
@@ -204,7 +211,7 @@ export class ChatsService {
   async getPersonalChatOfUserOrFailHttp(
     userId: string,
     chatId: Types.ObjectId,
-  ): Promise<PersonalChatFromMongoDto> {
+  ): Promise<PersonalChatDto> {
     const chat = await this.chatModel.findOne({
       $or: [
         { _id: chatId, 'firstCompanion._id': userId },
@@ -216,7 +223,7 @@ export class ChatsService {
       throw ErrorGenerator.create('CHAT_NOT_FOUND');
     }
 
-    const personalChat = PersonalChatFromMongoDto.createFromChat(chat, userId);
+    const personalChat = PersonalChatDto.createFromChat(chat, userId);
 
     return personalChat;
   }
@@ -244,7 +251,10 @@ export class ChatsService {
     });
 
     if (!chat) {
-      throw ErrorGenerator.create('CHAT_NOT_FOUND');
+      throw ErrorGenerator.create(
+        'CHAT_NOT_FOUND',
+        `Chat with ID ${chatId} and companion ${userId} not found.`,
+      );
     }
 
     return chat;
@@ -258,18 +268,8 @@ export class ChatsService {
   async readPersonalChatAsUser(
     chatId: Types.ObjectId,
     userId: string,
-  ): Promise<PersonalChatFromMongoDto> {
-    const chat = await this.chatModel.findOne({
-      _id: chatId,
-      $or: [
-        { 'firstCompanion._id': userId },
-        { 'secondCompanion._id': userId },
-      ],
-    });
-
-    if (!chat) {
-      throw ErrorGenerator.create('CHAT_NOT_FOUND');
-    }
+  ): Promise<PersonalChatDto> {
+    const chat = await this.getChatByIdAndCompanionOrFailHttp(chatId, userId);
 
     if (userId === chat.firstCompanion._id) {
       chat.notReadByFirstCompanionMessagesCount = 0;
@@ -279,7 +279,7 @@ export class ChatsService {
 
     await chat.save();
 
-    const personalChat = PersonalChatFromMongoDto.createFromChat(chat, userId);
+    const personalChat = PersonalChatDto.createFromChat(chat, userId);
 
     return personalChat;
   }
@@ -288,12 +288,7 @@ export class ChatsService {
     chatId: Types.ObjectId,
     lastMessage: MessageMongoDocument,
   ): Promise<void> {
-    const result = await this.chatModel.updateOne(
-      { _id: chatId },
-      { lastMessage },
-    );
-
-    console.log(result);
+    await this.chatModel.updateOne({ _id: chatId }, { lastMessage });
   }
 
   async incrementNotReadMessagesCountAndReadCompanionsMessages(
@@ -317,7 +312,7 @@ export class ChatsService {
     );
   }
 
-  async getIdsOfChatsOfUser(userId: string): Promise<Types.ObjectId[]> {
+  async listIdsOfChatsOfUser(userId: string): Promise<Types.ObjectId[]> {
     const chats: { _id: Types.ObjectId }[] = await this.chatModel
       .find(
         {

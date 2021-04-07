@@ -1,5 +1,5 @@
 import { MessageForFrontend } from '../../messages/dto/message-for-frontend.dto';
-import { PersonalChatFromMongoDto } from '../../chats/dto/personal-chat-from-mongo.dto';
+import { PersonalChatDto } from '../../chats/dto/personal-chat-from-mongo.dto';
 import { Types } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UpdateDocument } from '../schemas/update.schema';
@@ -27,10 +27,10 @@ export class UpdateDto {
   message?: MessageForFrontend;
 
   @ApiPropertyOptional({
-    type: () => PersonalChatFromMongoDto,
+    type: () => PersonalChatDto,
     description: 'Present, if type = `new_chat`',
   })
-  chat?: PersonalChatFromMongoDto;
+  chat?: PersonalChatDto;
 
   static fromUpdates(
     updates: UpdateDocument[],
@@ -43,7 +43,7 @@ export class UpdateDto {
     return new UpdateDto({
       ...update.toJSON(),
       chat: update.chat
-        ? PersonalChatFromMongoDto.createFromChat(update.chat, currentUserId)
+        ? PersonalChatDto.createFromChat(update.chat, currentUserId)
         : null,
       message: update.message
         ? MessageForFrontend.fromMessage(update.message, currentUserId)

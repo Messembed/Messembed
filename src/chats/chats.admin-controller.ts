@@ -61,6 +61,6 @@ export class ChatsAdminController {
   @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => PaginatedChatsInMongoDto })
   async getAllChats(): Promise<PaginatedChatsInMongoDto> {
-    return this.chatsService.getAllChats();
+    return this.chatsService.listAllChats();
   }
 }

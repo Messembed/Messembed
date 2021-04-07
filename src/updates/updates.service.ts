@@ -21,7 +21,7 @@ export class UpdatesService {
     currentUserId: string,
     creationDateOfLastFetchedUpdate: Date,
   ): Promise<UpdateDto[]> {
-    const idsOfChatsOfCurrentUser = await this.chatsService.getIdsOfChatsOfUser(
+    const idsOfChatsOfCurrentUser = await this.chatsService.listIdsOfChatsOfUser(
       currentUserId,
     );
 

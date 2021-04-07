@@ -34,6 +34,13 @@ export class MessagesService {
       options.userId,
     );
 
+    if (!chat.active) {
+      throw ErrorGenerator.create(
+        'CHAT_IS_INACTIVE',
+        `Chat with ID ${options.chatId} is inactive.`,
+      );
+    }
+
     const message = await this.messageModel.create({
       createdAt: new Date(),
       chat: options.chatId,

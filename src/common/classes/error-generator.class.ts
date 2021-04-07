@@ -6,6 +6,7 @@ export type ErrorCode = keyof typeof errors;
 export class ErrorGenerator {
   static create(
     code: ErrorCode,
+    message?: string,
     additional: Record<string, unknown> = {},
   ): HttpException {
     const statusCode = errors[code] || 500;

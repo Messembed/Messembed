@@ -17,7 +17,7 @@ import { ChatsQueryDto } from './dto/chats-query.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
 import { Types } from 'mongoose';
-import { PersonalChatFromMongoDto } from './dto/personal-chat-from-mongo.dto';
+import { PersonalChatDto } from './dto/personal-chat-from-mongo.dto';
 import { UserMongoDocument } from '../users/schemas/user.schema';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -35,11 +35,11 @@ export class ChatsController {
 
   @Post('user/personal-chats')
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: () => PersonalChatFromMongoDto })
+  @ApiOkResponse({ type: () => PersonalChatDto })
   async createPersonalChat(
     @Body() createData: CreatePersonalChatDto,
     @CurrentUser() currentUser: UserMongoDocument,
-  ): Promise<PersonalChatFromMongoDto> {
+  ): Promise<PersonalChatDto> {
     return this.chatsService.createPersonalChat(currentUser._id, createData);
   }
 
@@ -49,8 +49,8 @@ export class ChatsController {
   async getPersonalChats(
     @Query() query: ChatsQueryDto,
     @CurrentUser() currentUser: UserMongoDocument,
-  ): Promise<PersonalChatFromMongoDto[]> {
-    return this.chatsService.getPersonalChatsOfUser(currentUser._id, query);
+  ): Promise<PersonalChatDto[]> {
+    return this.chatsService.listPersonalChatsOfUser(currentUser._id, query);
   }
 
   @Get('user/personal-chats/:chatId')
@@ -59,7 +59,7 @@ export class ChatsController {
   async getPersonalChat(
     @Param() { chatId }: ChatPathForMongoDto,
     @CurrentUser() currentUser: UserMongoDocument,
-  ): Promise<PersonalChatFromMongoDto> {
+  ): Promise<PersonalChatDto> {
     return this.chatsService.getPersonalChatOfUserOrFailHttp(
       currentUser._id,
       new Types.ObjectId(chatId),
@@ -73,7 +73,7 @@ export class ChatsController {
   async setRead(
     @Param() { chatId }: ChatPathForMongoDto,
     @CurrentUser() currentUser: UserMongoDocument,
-  ): Promise<PersonalChatFromMongoDto> {
+  ): Promise<PersonalChatDto> {
     return this.chatsService.readPersonalChatAsUser(
       new Types.ObjectId(chatId),
       currentUser._id,

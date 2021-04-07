@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { UserMongo } from '../../users/schemas/user.schema';
 import { ChatMongoDocument } from '../schemas/chat.schema';
 
-export class PersonalChatFromMongoDto {
+export class PersonalChatDto {
   @ApiProperty({ type: 'string' })
   _id: Types.ObjectId;
 
@@ -35,15 +35,15 @@ export class PersonalChatFromMongoDto {
   static createFromChats(
     chats: ChatMongoDocument[],
     userId: string,
-  ): PersonalChatFromMongoDto[] {
+  ): PersonalChatDto[] {
     return chats.map(chat => this.createFromChat(chat, userId));
   }
 
   static createFromChat(
     chat: ChatMongoDocument,
     userId: string,
-  ): PersonalChatFromMongoDto {
-    return new PersonalChatFromMongoDto({
+  ): PersonalChatDto {
+    return new PersonalChatDto({
       _id: chat._id,
       createdAt: chat.createdAt,
       updatedAt: chat.updatedAt,
@@ -62,7 +62,7 @@ export class PersonalChatFromMongoDto {
     });
   }
 
-  constructor(fields: PersonalChatFromMongoDto) {
+  constructor(fields: PersonalChatDto) {
     Object.assign(this, fields);
   }
 }
