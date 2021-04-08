@@ -1,3 +1,7 @@
+/**
+ * @deprecated
+ * @todo remove
+ */
 export enum ValidationGroup {
   USER = 'USER',
   EXT_SER = 'EXT_SER',

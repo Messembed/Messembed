@@ -17,6 +17,7 @@ import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.g
 import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
 import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
 import { Types } from 'mongoose';
+import { GetChatPathDto } from './dto/get-chat-path.dto';
 
 @Controller()
 @ApiTags('Chat')
@@ -48,12 +49,16 @@ export class ChatsAdminController {
     ).toJSON();
   }
 
-  @Get('admin-api/chats/:chatId')
+  @Get('admin-api/chats/:chatIdOrCompanionsIds')
   @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => Object })
-  async getChat(@Param() { chatId }: ChatPathForMongoDto): Promise<any> {
+  async getChat(
+    @Param() { chatIdOrCompanionsIds }: GetChatPathDto,
+  ): Promise<any> {
     return (
-      await this.chatsService.getChatByIdOrFailHttp(new Types.ObjectId(chatId))
+      await this.chatsService.getChatByIdOrCompanionsIdsOrFailHttp(
+        chatIdOrCompanionsIds,
+      )
     ).toJSON();
   }
 

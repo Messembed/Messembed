@@ -93,7 +93,9 @@ export class MessagesService {
     chatId: Types.ObjectId,
     filters?: GetMessagesFromMongoFiltersDto,
   ): Promise<PaginatedMessagesForAdminDto> {
-    const chat = await this.chatsService.getChatByIdOrFailHttp(chatId);
+    const chat = await this.chatsService.getChatByIdOrCompanionsIdsOrFailHttp(
+      chatId,
+    );
 
     const messages = await this.getMessagesByChatId(chat._id, filters);
 

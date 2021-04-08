@@ -88,7 +88,7 @@ export class UpdatesGateway
   ): Promise<void> {
     const user = socket.request.user as UserMongoDocument;
 
-    const chat = await this.chatsService.getChatByIdOrFailHttp(
+    const chat = await this.chatsService.getChatByIdOrCompanionsIdsOrFailHttp(
       Types.ObjectId.createFromHexString(chatId),
     );
 

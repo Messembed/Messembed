@@ -130,7 +130,7 @@ export class ChatsService {
     chatId: Types.ObjectId,
     editDto: EditChatDto,
   ): Promise<ChatMongoDocument> {
-    const chat = await this.getChatByIdOrFailHttp(chatId);
+    const chat = await this.getChatByIdOrCompanionsIdsOrFailHttp(chatId);
 
     if (!_.isNil(editDto.externalMetadata)) {
       chat.externalMetadata = editDto.externalMetadata;
@@ -149,10 +149,34 @@ export class ChatsService {
     return chat;
   }
 
-  async getChatByIdOrFailHttp(
-    chatId: Types.ObjectId,
+  async getChatByIdOrCompanionsIdsOrFailHttp(
+    chatIdOrCompanionsIds: string | Types.ObjectId,
   ): Promise<ChatMongoDocument> {
-    const chat = await this.chatModel.findOne({ _id: chatId, deletedAt: null });
+    let chat = null;
+    if (
+      typeof chatIdOrCompanionsIds === 'string' &&
+      chatIdOrCompanionsIds.includes(':')
+    ) {
+      const [companionId1, compationId2] = chatIdOrCompanionsIds.split(':');
+      chat = await this.chatModel.findOne({
+        deletedAt: null,
+        $or: [
+          {
+            'firstCompanion._id': companionId1,
+            'secondCompanion._id': compationId2,
+          },
+          {
+            'firstCompanion._id': compationId2,
+            'secondCompanion._id': companionId1,
+          },
+        ],
+      });
+    } else {
+      chat = await this.chatModel.findOne({
+        _id: new Types.ObjectId(chatIdOrCompanionsIds),
+        deletedAt: null,
+      });
+    }
 
     if (!chat) {
       throw ErrorGenerator.create('CHAT_NOT_FOUND');
