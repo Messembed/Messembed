@@ -210,7 +210,7 @@ export class ChatsService {
           )
         : {};
 
-    const chats = await this.chatModel
+    let chats = await this.chatModel
       .find({
         active: true,
         $or: [
@@ -220,6 +220,29 @@ export class ChatsService {
         ...externalMetadataFilters,
       })
       .sort({ 'lastMessage.createdAt': 'desc' });
+
+    if (query.sort === 'UNREAD_FIRST') {
+      const unreadChats: ChatMongoDocument[] = [];
+      const readChats: ChatMongoDocument[] = [];
+
+      chats.forEach(chat => {
+        if (
+          chat.firstCompanion._id === userId &&
+          chat.notReadByFirstCompanionMessagesCount > 0
+        ) {
+          unreadChats.push(chat);
+        } else if (
+          chat.secondCompanion._id === userId &&
+          chat.notReadBySecondCompanionMessagesCount > 0
+        ) {
+          unreadChats.push(chat);
+        } else {
+          readChats.push(chat);
+        }
+      });
+
+      chats = [...unreadChats, ...readChats];
+    }
 
     const personalChats = PersonalChatDto.createFromChats(chats, userId);
 
