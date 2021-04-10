@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { UpdatesService } from './updates.service';
 import { UpdatesController } from './updates.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Update, UpdateSchema } from './schemas/update.schema';
+import { UpdateModel, UpdateSchema } from './schemas/update.schema';
 import { ChatsModule } from '../chats/chats.module';
 import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -15,7 +15,9 @@ import { MessagesModule } from '../messages/messages.module';
     forwardRef(() => ChatsModule),
     forwardRef(() => UsersModule),
     forwardRef(() => MessagesModule),
-    MongooseModule.forFeature([{ name: Update.name, schema: UpdateSchema }]),
+    MongooseModule.forFeature([
+      { name: UpdateModel.name, schema: UpdateSchema },
+    ]),
     JwtModule.registerAsync({
       useFactory: (authConfig: AuthConfigType) => ({
         secret: authConfig.jwtStrategy.jwtSecret,

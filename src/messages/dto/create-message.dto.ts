@@ -2,7 +2,7 @@ import { IsString, IsObject, IsOptional, IsEmpty } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidationGroup } from '../../common/constants/validation-group.enum';
 
-export class CreateMessageInMongoDto {
+export class CreateMessageDto {
   @ApiProperty()
   @IsString({ groups: [ValidationGroup.ALL] })
   content: string;

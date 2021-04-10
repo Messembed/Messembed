@@ -14,8 +14,8 @@ import { CreateChatDto } from './dto/create-chat.dto';
 import { ApiOkResponse, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { EditChatDto } from './dto/edit-chat.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
-import { ChatPathForMongoDto } from './dto/chat-path-for-mongo.dto';
-import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
+import { ChatPathDto } from './dto/chat-path.dto';
+import { PaginatedChatsDto } from './dto/paginated-chats.dto';
 import { Types } from 'mongoose';
 import { GetChatPathDto } from './dto/get-chat-path.dto';
 
@@ -41,7 +41,7 @@ export class ChatsAdminController {
   @UseGuards(ExternalServiceAuthGuard)
   @ApiOkResponse({ type: () => Object })
   async editChat(
-    @Param() { chatId }: ChatPathForMongoDto,
+    @Param() { chatId }: ChatPathDto,
     @Body() editDto: EditChatDto,
   ): Promise<any> {
     return (
@@ -64,8 +64,8 @@ export class ChatsAdminController {
 
   @Get('admin-api/chats')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => PaginatedChatsInMongoDto })
-  async getAllChats(): Promise<PaginatedChatsInMongoDto> {
+  @ApiOkResponse({ type: () => PaginatedChatsDto })
+  async getAllChats(): Promise<PaginatedChatsDto> {
     return this.chatsService.listAllChats();
   }
 }

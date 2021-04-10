@@ -1,5 +1,5 @@
 import { MessageForFrontend } from '../../messages/dto/message-for-frontend.dto';
-import { PersonalChatDto } from '../../chats/dto/personal-chat-from-mongo.dto';
+import { PersonalChatDto } from '../../chats/dto/personal-chat.dto';
 import { Types } from 'mongoose';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UpdateDocument } from '../schemas/update.schema';

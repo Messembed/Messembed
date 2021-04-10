@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-export interface CreateMessageInMongoOptions {
+export interface CreateMessageParams {
   content: string;
   externalMetadata?: Record<string, unknown>;
   privateExternalMetadata?: Record<string, unknown>;

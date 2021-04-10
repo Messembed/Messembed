@@ -3,14 +3,14 @@ import { CreateChatDto } from './dto/create-chat.dto';
 import { EditChatDto } from './dto/edit-chat.dto';
 import { ChatsQueryDto } from './dto/chats-query.dto';
 import { FilterQuery, Model, Types } from 'mongoose';
-import { ChatMongo, ChatMongoDocument } from './schemas/chat.schema';
+import { ChatModel, ChatDocument } from './schemas/chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '../users/users.service';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
-import { PaginatedChatsInMongoDto } from './dto/paginated-chats-from-mongo.dto';
-import { MessageMongoDocument } from '../messages/schemas/message.schema';
-import { UserMongoDocument } from '../users/schemas/user.schema';
-import { PersonalChatDto } from './dto/personal-chat-from-mongo.dto';
+import { PaginatedChatsDto } from './dto/paginated-chats.dto';
+import { MessageDocument } from '../messages/schemas/message.schema';
+import { UserDocument } from '../users/schemas/user.schema';
+import { PersonalChatDto } from './dto/personal-chat.dto';
 import _ from 'lodash';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { UpdatesService } from '../updates/updates.service';
@@ -22,8 +22,8 @@ export class ChatsService {
   constructor(
     @Inject(APP_CONFIG_KEY)
     private readonly appConfigs: AppConfigType,
-    @InjectModel(ChatMongo.name)
-    private readonly chatModel: Model<ChatMongoDocument>,
+    @InjectModel(ChatModel.name)
+    private readonly chatModel: Model<ChatDocument>,
     @Inject(forwardRef(() => UpdatesService))
     private readonly updatesService: UpdatesService,
     @Inject(forwardRef(() => MessagesService))
@@ -82,7 +82,7 @@ export class ChatsService {
     return PersonalChatDto.createFromChat(chat, currentUser._id);
   }
 
-  async createChat(createDto: CreateChatDto): Promise<ChatMongoDocument> {
+  async createChat(createDto: CreateChatDto): Promise<ChatDocument> {
     const firstCompanion = await this.usersService.getUser(
       createDto.firstCompanionId,
     );
@@ -132,7 +132,7 @@ export class ChatsService {
   async editChat(
     chatId: Types.ObjectId,
     editDto: EditChatDto,
-  ): Promise<ChatMongoDocument> {
+  ): Promise<ChatDocument> {
     const chat = await this.getChatByIdOrCompanionsIdsOrFailHttp(chatId);
 
     if (!_.isNil(editDto.externalMetadata)) {
@@ -154,7 +154,7 @@ export class ChatsService {
 
   async getChatByIdOrCompanionsIdsOrFailHttp(
     chatIdOrCompanionsIds: string | Types.ObjectId,
-  ): Promise<ChatMongoDocument> {
+  ): Promise<ChatDocument> {
     let chat = null;
     if (
       typeof chatIdOrCompanionsIds === 'string' &&
@@ -188,11 +188,11 @@ export class ChatsService {
     return chat;
   }
 
-  async listAllChats(): Promise<PaginatedChatsInMongoDto> {
+  async listAllChats(): Promise<PaginatedChatsDto> {
     const chats = await this.chatModel.find({ deletedAt: null });
     const totalCount = await this.chatModel.count({ deletedAt: null });
 
-    return new PaginatedChatsInMongoDto(chats, totalCount);
+    return new PaginatedChatsDto(chats, totalCount);
   }
 
   /**
@@ -205,7 +205,7 @@ export class ChatsService {
     currentUserId: string,
     query?: ChatsQueryDto,
   ): Promise<PersonalChatDto[]> {
-    const additionalFilters: FilterQuery<ChatMongoDocument> = {};
+    const additionalFilters: FilterQuery<ChatDocument> = {};
 
     if (query && query.externalMetadata) {
       const externalMetadataFilters: Record<string, unknown> = _.mapKeys(
@@ -217,7 +217,7 @@ export class ChatsService {
     }
 
     let chatToLatestMatchingMessageMapping: {
-      [chatId: string]: MessageMongoDocument;
+      [chatId: string]: MessageDocument;
     } | null = null;
 
     if (query && query.query) {
@@ -244,8 +244,8 @@ export class ChatsService {
       .sort({ 'lastMessage.createdAt': 'desc' });
 
     if (query.sort === 'UNREAD_FIRST') {
-      const unreadChats: ChatMongoDocument[] = [];
-      const readChats: ChatMongoDocument[] = [];
+      const unreadChats: ChatDocument[] = [];
+      const readChats: ChatDocument[] = [];
 
       chats.forEach(chat => {
         if (
@@ -312,7 +312,7 @@ export class ChatsService {
   async getChatByIdAndCompanionOrFailHttp(
     chatId: Types.ObjectId,
     userId: string,
-  ): Promise<ChatMongoDocument> {
+  ): Promise<ChatDocument> {
     const chat = await this.chatModel.findOne({
       $or: [
         {
@@ -362,7 +362,7 @@ export class ChatsService {
 
   async setLastMessageOfChat(
     chatId: Types.ObjectId,
-    lastMessage: MessageMongoDocument,
+    lastMessage: MessageDocument,
   ): Promise<void> {
     await this.chatModel.updateOne({ _id: chatId }, { lastMessage });
   }
@@ -406,7 +406,7 @@ export class ChatsService {
     return chatIds;
   }
 
-  async updateUserInChats(user: UserMongoDocument): Promise<void> {
+  async updateUserInChats(user: UserDocument): Promise<void> {
     await Promise.all([
       this.chatModel.updateMany(
         {

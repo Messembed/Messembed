@@ -11,14 +11,14 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { ChatPathForMongoDto } from '../chats/dto/chat-path-for-mongo.dto';
-import { CreateMessageInMongoDto } from './dto/create-message-in-mongo.dto';
+import { ChatPathDto } from '../chats/dto/chat-path.dto';
+import { CreateMessageDto } from './dto/create-message.dto';
 import { Types } from 'mongoose';
-import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
-import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
+import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
+import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { UserMongoDocument } from '../users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 
 @Controller()
 @ApiTags('Messages')
@@ -38,9 +38,9 @@ export class MessagesController {
   @UseGuards(JwtAuthGuard)
   @ApiCreatedResponse({ type: () => Object })
   async createMessage(
-    @Param() { chatId }: ChatPathForMongoDto,
-    @Body() createDto: CreateMessageInMongoDto,
-    @CurrentUser() currentUser: UserMongoDocument,
+    @Param() { chatId }: ChatPathDto,
+    @Body() createDto: CreateMessageDto,
+    @CurrentUser() currentUser: UserDocument,
   ): Promise<any> {
     return (
       await this.messagesService.createMessage({
@@ -64,10 +64,10 @@ export class MessagesController {
   )
   @ApiOkResponse({ type: () => Object, isArray: true })
   async getMessages(
-    @Param() { chatId }: ChatPathForMongoDto,
-    @Query() filters: GetMessagesFromMongoFiltersDto,
-    @CurrentUser() currentUser: UserMongoDocument,
-  ): Promise<PaginatedMessagesFromMongoDto> {
+    @Param() { chatId }: ChatPathDto,
+    @Query() filters: GetMessagesFiltersDto,
+    @CurrentUser() currentUser: UserDocument,
+  ): Promise<PaginatedMessagesDto> {
     return this.messagesService.getPaginatedMessagesForUser(
       currentUser._id,
       Types.ObjectId(chatId),

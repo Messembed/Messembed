@@ -1,7 +1,7 @@
 import { IsObject, IsOptional, IsMongoId } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CreateMessageAsAdminInMongoDto {
+export class CreateMessageAsAdminDto {
   @ApiProperty()
   @IsMongoId()
   userId: string;

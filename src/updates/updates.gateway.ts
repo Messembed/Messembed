@@ -19,7 +19,7 @@ import { Types } from 'mongoose';
 import { SendWritingIndicatorDto } from '../chats/dto/send-writing-indicator.dto';
 import { ChatsService } from '../chats/chats.service';
 import { MarkMessageAsReadThroughWebSocketDto } from '../messages/dto/mark-message-as-read-through-websocket.dto';
-import { UserMongoDocument } from '../users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 
 @WebSocketGateway({
   transports: ['websocket', 'polling'],
@@ -44,7 +44,7 @@ export class UpdatesGateway
   async handleConnection(socket: Socket): Promise<void> {
     await this.authSocket(socket);
 
-    const user = socket.request.user as UserMongoDocument;
+    const user = socket.request.user as UserDocument;
 
     if (this.connectedSockets[user._id]) {
       this.connectedSockets[user._id].push(socket);
@@ -54,7 +54,7 @@ export class UpdatesGateway
   }
 
   handleDisconnect(socket: Socket): void {
-    const user = socket.request.user as UserMongoDocument;
+    const user = socket.request.user as UserDocument;
 
     if (this.connectedSockets[user._id]) {
       _.pull(this.connectedSockets[user._id], socket);
@@ -86,7 +86,7 @@ export class UpdatesGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() { chatId }: SendWritingIndicatorDto,
   ): Promise<void> {
-    const user = socket.request.user as UserMongoDocument;
+    const user = socket.request.user as UserDocument;
 
     const chat = await this.chatsService.getChatByIdOrCompanionsIdsOrFailHttp(
       Types.ObjectId.createFromHexString(chatId),
@@ -121,7 +121,7 @@ export class UpdatesGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() createMessageData: CreateMessageThroughWebSocketDto,
   ): Promise<void> {
-    const user = socket.request.user as UserMongoDocument;
+    const user = socket.request.user as UserDocument;
 
     await this.messagesService.createMessage({
       ...createMessageData,
@@ -141,7 +141,7 @@ export class UpdatesGateway
     @ConnectedSocket() socket: Socket,
     @MessageBody() params: MarkMessageAsReadThroughWebSocketDto,
   ): Promise<void> {
-    const user = socket.request.user as UserMongoDocument;
+    const user = socket.request.user as UserDocument;
 
     const {
       chat,

@@ -1,9 +1,9 @@
-import { MessageMongoDocument } from '../../messages/schemas/message.schema';
+import { MessageDocument } from '../../messages/schemas/message.schema';
 import { MessageForFrontend } from '../../messages/dto/message-for-frontend.dto';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { UserMongo } from '../../users/schemas/user.schema';
-import { ChatMongoDocument } from '../schemas/chat.schema';
+import { UserModel } from '../../users/schemas/user.schema';
+import { ChatDocument } from '../schemas/chat.schema';
 
 export class PersonalChatDto {
   @ApiProperty({ type: 'string' })
@@ -28,17 +28,17 @@ export class PersonalChatDto {
   lastMessage: MessageForFrontend;
 
   @ApiProperty({ type: () => Object })
-  companion: UserMongo;
+  companion: UserModel;
 
   @ApiProperty()
   unreadMessagesCount: number;
 
   static createFromChats(
-    chats: ChatMongoDocument[],
+    chats: ChatDocument[],
     currentUserId: string,
     options?: {
       chatToLatestMatchingMessageMapping?: {
-        [chatId: string]: MessageMongoDocument;
+        [chatId: string]: MessageDocument;
       };
     },
   ): PersonalChatDto[] {
@@ -53,9 +53,9 @@ export class PersonalChatDto {
   }
 
   static createFromChat(
-    chat: ChatMongoDocument,
+    chat: ChatDocument,
     currentUserId: string,
-    options?: { overrideLatestMessage?: MessageMongoDocument },
+    options?: { overrideLatestMessage?: MessageDocument },
   ): PersonalChatDto {
     const lastMessage: MessageForFrontend =
       options && options.overrideLatestMessage

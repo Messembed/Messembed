@@ -2,10 +2,10 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { Model } from 'mongoose';
-import { UserMongo, UserMongoDocument } from './schemas/user.schema';
+import { UserModel, UserDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
-import { PaginatedUserInMongoDto } from './dto/paginated-user-in-mongo.dto';
+import { PaginatedUsersDto } from './dto/paginated-users.dto';
 import { MongoErrorCodes } from '../common/constants/mongo-error-codes.enum';
 import { ChatsService } from '../chats/chats.service';
 import _ from 'lodash';
@@ -13,13 +13,13 @@ import _ from 'lodash';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(UserMongo.name)
-    private readonly userModel: Model<UserMongoDocument>,
+    @InjectModel(UserModel.name)
+    private readonly userModel: Model<UserDocument>,
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
   ) {}
 
-  async createUser(createDto: CreateUserDto): Promise<UserMongoDocument> {
+  async createUser(createDto: CreateUserDto): Promise<UserDocument> {
     try {
       const user = await this.userModel.create({
         _id: createDto.id,
@@ -39,10 +39,7 @@ export class UsersService {
     }
   }
 
-  async editUser(
-    userId: string,
-    editDto: EditUserDto,
-  ): Promise<UserMongoDocument> {
+  async editUser(userId: string, editDto: EditUserDto): Promise<UserDocument> {
     const user = await this.userModel.findOne({
       _id: userId,
       deletedAt: null,
@@ -68,7 +65,7 @@ export class UsersService {
     return user;
   }
 
-  async getUser(userId: string): Promise<UserMongoDocument> {
+  async getUser(userId: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({
       _id: userId,
       deletedAt: null,
@@ -81,14 +78,14 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers(): Promise<PaginatedUserInMongoDto> {
+  async getAllUsers(): Promise<PaginatedUsersDto> {
     const users = await this.userModel.find({ deletedAt: null });
     const totalCount = await this.userModel.count({ deletedAt: null });
 
-    return new PaginatedUserInMongoDto(users, totalCount);
+    return new PaginatedUsersDto(users, totalCount);
   }
 
-  async getUserByIdOrFail(userId: string): Promise<UserMongoDocument> {
+  async getUserByIdOrFail(userId: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ _id: userId });
     if (!user) {
       throw new Error(`User not found with id ${userId}`);

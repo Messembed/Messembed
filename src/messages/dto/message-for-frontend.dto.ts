@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { MessageMongoDocument } from '../schemas/message.schema';
+import { MessageDocument } from '../schemas/message.schema';
 import { Types } from 'mongoose';
 
 export class MessageForFrontend {
@@ -40,14 +40,14 @@ export class MessageForFrontend {
   privateExternalMetadata?: Record<string, unknown> | null;
 
   static fromMessages(
-    messages: MessageMongoDocument[],
+    messages: MessageDocument[],
     currentUserId?: string,
   ): MessageForFrontend[] {
     return messages.map(message => this.fromMessage(message, currentUserId));
   }
 
   static fromMessage(
-    message: MessageMongoDocument,
+    message: MessageDocument,
     currentUserId?: string,
   ): MessageForFrontend {
     return new MessageForFrontend({

@@ -9,7 +9,7 @@ import {
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UserMongoDocument } from '../users/schemas/user.schema';
+import { UserDocument } from '../users/schemas/user.schema';
 import { GetUpdatesRequestDto } from './dto/get-updates-request.dto';
 import { UpdateDto } from './dto/update.dto';
 import { UpdatesService } from './updates.service';
@@ -33,7 +33,7 @@ export class UpdatesController {
   )
   async getUpdates(
     @Query() filters: GetUpdatesRequestDto,
-    @CurrentUser() currentUser: UserMongoDocument,
+    @CurrentUser() currentUser: UserDocument,
   ): Promise<UpdateDto[]> {
     const updates = await this.updatesService.getUpdatesForUser(
       currentUser._id,

@@ -13,7 +13,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserPathDto } from './dto/user-path.dto';
 import { EditUserDto } from './dto/edit-user.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
-import { PaginatedUserInMongoDto } from './dto/paginated-user-in-mongo.dto';
+import { PaginatedUsersDto } from './dto/paginated-users.dto';
 
 @Controller()
 @ApiTags('User')
@@ -39,8 +39,8 @@ export class UsersAdminController {
 
   @Get('admin-api/users')
   @UseGuards(ExternalServiceAuthGuard)
-  @ApiOkResponse({ type: () => PaginatedUserInMongoDto })
-  async findUsers(): Promise<PaginatedUserInMongoDto> {
+  @ApiOkResponse({ type: () => PaginatedUsersDto })
+  async findUsers(): Promise<PaginatedUsersDto> {
     return this.usersService.getAllUsers();
   }
 }

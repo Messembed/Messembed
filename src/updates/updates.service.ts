@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { ChatsService } from '../chats/chats.service';
 import { CreateUpdateInput } from './interfaces/create-update-input.interface';
 import { UpdateDto } from './dto/update.dto';
-import { Update, UpdateDocument } from './schemas/update.schema';
+import { UpdateModel, UpdateDocument } from './schemas/update.schema';
 import { UpdatesGateway } from './updates.gateway';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class UpdatesService {
   constructor(
     @Inject(forwardRef(() => ChatsService))
     private readonly chatsService: ChatsService,
-    @InjectModel(Update.name)
+    @InjectModel(UpdateModel.name)
     private readonly updateModel: Model<UpdateDocument>,
     private readonly updatesGateway: UpdatesGateway,
   ) {}

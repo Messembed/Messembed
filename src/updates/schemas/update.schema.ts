@@ -1,21 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Document, Types } from 'mongoose';
+import { ChatDocument, ChatSchema } from '../../chats/schemas/chat.schema';
 import {
-  ChatMongoDocument,
-  ChatMongoSchema,
-} from '../../chats/schemas/chat.schema';
-import {
-  MessageMongoDocument,
-  MessageMongoSchema,
+  MessageDocument,
+  MessageSchema,
 } from '../../messages/schemas/message.schema';
 
-export type UpdateDocument = Update & Document;
+export type UpdateDocument = UpdateModel & Document;
 
 @Schema({
   minimize: false,
 })
-export class Update {
+export class UpdateModel {
   _id: Types.ObjectId;
 
   @Prop({ type: Date, required: true, index: true })
@@ -35,14 +32,14 @@ export class Update {
   /**
    * present, if type = 'new_message'
    */
-  @Prop({ type: MessageMongoSchema, required: false })
-  message?: MessageMongoDocument;
+  @Prop({ type: MessageSchema, required: false })
+  message?: MessageDocument;
 
   /**
    * present, if type = 'new_chat'
    */
-  @Prop({ type: ChatMongoSchema, required: false })
-  chat?: ChatMongoDocument;
+  @Prop({ type: ChatSchema, required: false })
+  chat?: ChatDocument;
 }
 
-export const UpdateSchema = SchemaFactory.createForClass(Update);
+export const UpdateSchema = SchemaFactory.createForClass(UpdateModel);

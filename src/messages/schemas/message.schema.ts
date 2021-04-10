@@ -2,12 +2,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Document, Types } from 'mongoose';
 
-export type MessageMongoDocument = MessageMongo & Document;
+export type MessageDocument = MessageModel & Document;
 
 @Schema({
   minimize: false,
 })
-export class MessageMongo {
+export class MessageModel {
   @Prop({ type: Date, required: true })
   createdAt: Date;
 
@@ -39,4 +39,4 @@ export class MessageMongo {
   privateExternalMetadata?: Record<string, unknown> | null;
 }
 
-export const MessageMongoSchema = SchemaFactory.createForClass(MessageMongo);
+export const MessageSchema = SchemaFactory.createForClass(MessageModel);

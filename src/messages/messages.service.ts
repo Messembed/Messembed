@@ -1,17 +1,17 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { CreateMessageInMongoOptions } from './interfaces/create-message-in-mongo-options.interface';
+import { CreateMessageParams } from './interfaces/create-message-params.interface';
 import _ from 'lodash';
 import { ChatsService } from '../chats/chats.service';
-import { MessageMongo, MessageMongoDocument } from './schemas/message.schema';
+import { MessageModel, MessageDocument } from './schemas/message.schema';
 import { Model, Types } from 'mongoose';
-import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
-import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
+import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
+import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
 import { MessageForFrontend } from './dto/message-for-frontend.dto';
 import { MarkMessageAsReadThroughWebSocketDto } from './dto/mark-message-as-read-through-websocket.dto';
 import { Condition } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdatesService } from '../updates/updates.service';
-import { ChatMongoDocument } from '../chats/schemas/chat.schema';
+import { ChatDocument } from '../chats/schemas/chat.schema';
 import { PaginatedMessagesForAdminDto } from './dto/paginated-messages-for-admin.dto';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
 
@@ -22,14 +22,14 @@ export class MessagesService {
     private readonly chatsService: ChatsService,
     @Inject(forwardRef(() => UpdatesService))
     private readonly updatesService: UpdatesService,
-    @InjectModel(MessageMongo.name)
-    private readonly messageModel: Model<MessageMongoDocument>,
+    @InjectModel(MessageModel.name)
+    private readonly messageModel: Model<MessageDocument>,
   ) {}
 
   async getLatestMatchingMessageInChatsOfUser(
     userId: string,
     query: string,
-  ): Promise<{ [chatId: string]: MessageMongoDocument }> {
+  ): Promise<{ [chatId: string]: MessageDocument }> {
     const chatIds = await this.chatsService.listIdsOfChatsOfUser(userId);
 
     const plainMessages: any[] = await this.messageModel
@@ -77,7 +77,7 @@ export class MessagesService {
       .exec();
 
     const chatToLatestMatchingMessageMapping: {
-      [chatId: string]: MessageMongoDocument;
+      [chatId: string]: MessageDocument;
     } = {};
 
     plainMessages.forEach(plainMessage => {
@@ -88,9 +88,7 @@ export class MessagesService {
     return chatToLatestMatchingMessageMapping;
   }
 
-  async createMessage(
-    options: CreateMessageInMongoOptions,
-  ): Promise<MessageMongoDocument> {
+  async createMessage(options: CreateMessageParams): Promise<MessageDocument> {
     const chat = await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       options.chatId,
       options.userId,
@@ -131,8 +129,8 @@ export class MessagesService {
   async getPaginatedMessagesForUser(
     currentUserId: string,
     chatId: Types.ObjectId,
-    filters?: GetMessagesFromMongoFiltersDto,
-  ): Promise<PaginatedMessagesFromMongoDto> {
+    filters?: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesDto> {
     await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       chatId,
       currentUserId,
@@ -145,7 +143,7 @@ export class MessagesService {
       currentUserId,
     );
 
-    return new PaginatedMessagesFromMongoDto({
+    return new PaginatedMessagesDto({
       ...filters,
       messages: messagesForFrontend,
     });
@@ -153,7 +151,7 @@ export class MessagesService {
 
   async getPaginatedMessagesForAdmin(
     chatId: Types.ObjectId,
-    filters?: GetMessagesFromMongoFiltersDto,
+    filters?: GetMessagesFiltersDto,
   ): Promise<PaginatedMessagesForAdminDto> {
     const chat = await this.chatsService.getChatByIdOrCompanionsIdsOrFailHttp(
       chatId,
@@ -169,8 +167,8 @@ export class MessagesService {
 
   async getMessagesByChatId(
     chatId: Types.ObjectId,
-    filters?: GetMessagesFromMongoFiltersDto,
-  ): Promise<MessageMongoDocument[]> {
+    filters?: GetMessagesFiltersDto,
+  ): Promise<MessageDocument[]> {
     const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)
       ? { $gte: filters?.after }
       : !_.isNil(filters?.before)
@@ -201,7 +199,7 @@ export class MessagesService {
   async markMessageAsReadConsideringAccessRights(
     currentUserId: string,
     params: MarkMessageAsReadThroughWebSocketDto,
-  ): Promise<{ chat: ChatMongoDocument }> {
+  ): Promise<{ chat: ChatDocument }> {
     const chat = await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       Types.ObjectId.createFromHexString(params.chatId),
       currentUserId,
@@ -230,21 +228,21 @@ export class MessagesService {
   }
 
   async getAllMessagesForAdminWrapped(
-    filters?: GetMessagesFromMongoFiltersDto,
-  ): Promise<PaginatedMessagesFromMongoDto> {
+    filters?: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesDto> {
     const messages = await this.getAllMessagesForAdmin(filters);
 
     const messagesForFrontend = MessageForFrontend.fromMessages(messages);
 
-    return new PaginatedMessagesFromMongoDto({
+    return new PaginatedMessagesDto({
       ...filters,
       messages: messagesForFrontend,
     });
   }
 
   async getAllMessagesForAdmin(
-    filters?: GetMessagesFromMongoFiltersDto,
-  ): Promise<MessageMongoDocument[]> {
+    filters?: GetMessagesFiltersDto,
+  ): Promise<MessageDocument[]> {
     const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)
       ? { $gte: filters?.after }
       : !_.isNil(filters?.before)

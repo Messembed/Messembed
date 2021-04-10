@@ -5,7 +5,7 @@ import { ChatsAdminController } from './chats.admin-controller';
 import { UsersModule } from '../users/users.module';
 import { MessagesModule } from '../messages/messages.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ChatMongo, ChatMongoSchema } from './schemas/chat.schema';
+import { ChatModel, ChatSchema } from './schemas/chat.schema';
 import { UpdatesModule } from '../updates/updates.module';
 
 @Module({
@@ -13,9 +13,7 @@ import { UpdatesModule } from '../updates/updates.module';
     UsersModule,
     forwardRef(() => MessagesModule),
     forwardRef(() => UpdatesModule),
-    MongooseModule.forFeature([
-      { name: ChatMongo.name, schema: ChatMongoSchema },
-    ]),
+    MongooseModule.forFeature([{ name: ChatModel.name, schema: ChatSchema }]),
   ],
   providers: [ChatsService],
   controllers: [ChatsController, ChatsAdminController],

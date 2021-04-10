@@ -3,7 +3,7 @@ import { MessagesService } from './messages.service';
 import { MessagesController } from './messages.controller';
 import { ChatsModule } from '../chats/chats.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MessageMongo, MessageMongoSchema } from './schemas/message.schema';
+import { MessageModel, MessageSchema } from './schemas/message.schema';
 import { MessagesAdminController } from './messages.admin-controller';
 import { UpdatesModule } from '../updates/updates.module';
 
@@ -12,7 +12,7 @@ import { UpdatesModule } from '../updates/updates.module';
     forwardRef(() => ChatsModule),
     forwardRef(() => UpdatesModule),
     MongooseModule.forFeature([
-      { name: MessageMongo.name, schema: MessageMongoSchema },
+      { name: MessageModel.name, schema: MessageSchema },
     ]),
   ],
   providers: [MessagesService],

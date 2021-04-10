@@ -4,7 +4,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { JwtAuthTokenPayload } from '../interfaces/jwt-auth-token-payload.interface';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../../config/auth.config';
 import { UsersService } from '../../users/users.service';
-import { UserMongoDocument } from '../../users/schemas/user.schema';
+import { UserDocument } from '../../users/schemas/user.schema';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: JwtAuthTokenPayload): Promise<UserMongoDocument> {
+  async validate(payload: JwtAuthTokenPayload): Promise<UserDocument> {
     const user = await this.usersService.getUserByIdOrFail(payload.sub);
 
     return user;

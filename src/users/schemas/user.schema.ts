@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-export interface UserMongoDocument extends UserMongo, Document {
+export interface UserDocument extends UserModel, Document {
   _id: string;
 }
 
 @Schema({
   minimize: false,
 })
-export class UserMongo {
+export class UserModel {
   @Prop({ type: String })
   _id: string;
 
@@ -27,4 +27,4 @@ export class UserMongo {
   privateExternalMetadata?: Record<string, unknown> | null;
 }
 
-export const UserMongoSchema = SchemaFactory.createForClass(UserMongo);
+export const UserSchema = SchemaFactory.createForClass(UserModel);

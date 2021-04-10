@@ -11,12 +11,12 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { ChatPathForMongoDto } from '../chats/dto/chat-path-for-mongo.dto';
+import { ChatPathDto } from '../chats/dto/chat-path.dto';
 import { Types } from 'mongoose';
-import { GetMessagesFromMongoFiltersDto } from './dto/get-messages-from-mongo-filters.dto';
-import { PaginatedMessagesFromMongoDto } from './dto/paginated-messages-from-mongo.dto';
+import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
+import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
 import { ExternalServiceAuthGuard } from '../auth/guards/external-service-auth.guard';
-import { CreateMessageAsAdminInMongoDto } from './dto/create-message-as-admin-in-mongo.dto';
+import { CreateMessageAsAdminDto } from './dto/create-message-as-admin.dto';
 import { PaginatedMessagesForAdminDto } from './dto/paginated-messages-for-admin.dto';
 
 @Controller()
@@ -34,8 +34,8 @@ export class MessagesAdminController {
   @UseGuards(ExternalServiceAuthGuard)
   @ApiCreatedResponse({ type: () => Object })
   async createMessage(
-    @Param() { chatId }: ChatPathForMongoDto,
-    @Body() createDto: CreateMessageAsAdminInMongoDto,
+    @Param() { chatId }: ChatPathDto,
+    @Body() createDto: CreateMessageAsAdminDto,
   ): Promise<any> {
     return (
       await this.messagesService.createMessage({
@@ -56,8 +56,8 @@ export class MessagesAdminController {
   )
   @ApiOkResponse({ type: () => Object, isArray: true })
   async getMessages(
-    @Param() { chatId }: ChatPathForMongoDto,
-    @Query() filters: GetMessagesFromMongoFiltersDto,
+    @Param() { chatId }: ChatPathDto,
+    @Query() filters: GetMessagesFiltersDto,
   ): Promise<PaginatedMessagesForAdminDto> {
     return this.messagesService.getPaginatedMessagesForAdmin(
       Types.ObjectId(chatId),
@@ -73,10 +73,10 @@ export class MessagesAdminController {
       transform: true,
     }),
   )
-  @ApiOkResponse({ type: () => PaginatedMessagesFromMongoDto, isArray: true })
+  @ApiOkResponse({ type: () => PaginatedMessagesDto, isArray: true })
   async findMessages(
-    @Query() filters: GetMessagesFromMongoFiltersDto,
-  ): Promise<PaginatedMessagesFromMongoDto> {
+    @Query() filters: GetMessagesFiltersDto,
+  ): Promise<PaginatedMessagesDto> {
     return this.messagesService.getAllMessagesForAdminWrapped(filters);
   }
 }
