@@ -2,7 +2,7 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { EditChatDto } from './dto/edit-chat.dto';
 import { ChatsQueryDto } from './dto/chats-query.dto';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { ChatMongo, ChatMongoDocument } from './schemas/chat.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UsersService } from '../users/users.service';
@@ -15,6 +15,7 @@ import _ from 'lodash';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { UpdatesService } from '../updates/updates.service';
 import { APP_CONFIG_KEY, AppConfigType } from '../config/app.config';
+import { MessagesService } from '../messages/messages.service';
 
 @Injectable()
 export class ChatsService {
@@ -25,6 +26,8 @@ export class ChatsService {
     private readonly chatModel: Model<ChatMongoDocument>,
     @Inject(forwardRef(() => UpdatesService))
     private readonly updatesService: UpdatesService,
+    @Inject(forwardRef(() => MessagesService))
+    private readonly messagesService: MessagesService,
     private readonly usersService: UsersService,
   ) {}
 
@@ -199,25 +202,44 @@ export class ChatsService {
    * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
    */
   async listPersonalChatsOfUser(
-    userId: string,
+    currentUserId: string,
     query?: ChatsQueryDto,
   ): Promise<PersonalChatDto[]> {
-    const externalMetadataFilters: Record<string, unknown> =
-      query && query.externalMetadata
-        ? _.mapKeys(
-            query.externalMetadata,
-            (value, key) => `externalMetadata.${key}`,
-          )
-        : {};
+    const additionalFilters: FilterQuery<ChatMongoDocument> = {};
+
+    if (query && query.externalMetadata) {
+      const externalMetadataFilters: Record<string, unknown> = _.mapKeys(
+        query.externalMetadata,
+        (value, key) => `externalMetadata.${key}`,
+      );
+
+      _.assign(additionalFilters, externalMetadataFilters);
+    }
+
+    let chatToLatestMatchingMessageMapping: {
+      [chatId: string]: MessageMongoDocument;
+    } | null = null;
+
+    if (query && query.query) {
+      chatToLatestMatchingMessageMapping = await this.messagesService.getLatestMatchingMessageInChatsOfUser(
+        currentUserId,
+        query.query,
+      );
+
+      const matchingChatIds = _.keys(chatToLatestMatchingMessageMapping);
+      additionalFilters._id = {
+        $in: matchingChatIds.map(id => new Types.ObjectId(id)),
+      };
+    }
 
     let chats = await this.chatModel
       .find({
         active: true,
         $or: [
-          { 'firstCompanion._id': userId },
-          { 'secondCompanion._id': userId },
+          { 'firstCompanion._id': currentUserId },
+          { 'secondCompanion._id': currentUserId },
         ],
-        ...externalMetadataFilters,
+        ...additionalFilters,
       })
       .sort({ 'lastMessage.createdAt': 'desc' });
 
@@ -227,12 +249,12 @@ export class ChatsService {
 
       chats.forEach(chat => {
         if (
-          chat.firstCompanion._id === userId &&
+          chat.firstCompanion._id === currentUserId &&
           chat.notReadByFirstCompanionMessagesCount > 0
         ) {
           unreadChats.push(chat);
         } else if (
-          chat.secondCompanion._id === userId &&
+          chat.secondCompanion._id === currentUserId &&
           chat.notReadBySecondCompanionMessagesCount > 0
         ) {
           unreadChats.push(chat);
@@ -244,7 +266,14 @@ export class ChatsService {
       chats = [...unreadChats, ...readChats];
     }
 
-    const personalChats = PersonalChatDto.createFromChats(chats, userId);
+    const personalChats = PersonalChatDto.createFromChats(
+      chats,
+      currentUserId,
+      {
+        chatToLatestMatchingMessageMapping:
+          query && query.query ? chatToLatestMatchingMessageMapping : null,
+      },
+    );
 
     return personalChats;
   }

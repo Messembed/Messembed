@@ -26,6 +26,68 @@ export class MessagesService {
     private readonly messageModel: Model<MessageMongoDocument>,
   ) {}
 
+  async getLatestMatchingMessageInChatsOfUser(
+    userId: string,
+    query: string,
+  ): Promise<{ [chatId: string]: MessageMongoDocument }> {
+    const chatIds = await this.chatsService.listIdsOfChatsOfUser(userId);
+
+    const plainMessages: any[] = await this.messageModel
+      .aggregate([
+        {
+          $match: {
+            chat: { $in: chatIds },
+            $text: { $search: query },
+          },
+        },
+        {
+          $sort: { createdAt: 1 },
+        },
+        {
+          $group: {
+            _id: '$chat',
+            lastId: { $last: '$_id' },
+            createdAt: { $last: '$createdAt' },
+            updatedAt: { $last: '$updatedAt' },
+            deletedAt: { $last: '$deletedAt' },
+            editedAt: { $last: '$editedAt' },
+            user: { $last: '$user' },
+            content: { $last: '$content' },
+            read: { $last: '$read' },
+            externalMetadata: { $last: '$externalMetadata' },
+            privateExternalMetadata: { $last: '$privateExternalMetadata' },
+          },
+        },
+        {
+          $project: {
+            _id: '$lastId',
+            chat: '$_id',
+            createdAt: 1,
+            updatedAt: 1,
+            deletedAt: 1,
+            editedAt: 1,
+            user: 1,
+            content: 1,
+            read: 1,
+            externalMetadata: 1,
+            privateExternalMetadata: 1,
+          },
+        },
+      ])
+      .exec();
+
+    const chatToLatestMatchingMessageMapping: {
+      [chatId: string]: MessageMongoDocument;
+    } = {};
+
+    plainMessages.forEach(plainMessage => {
+      const message = this.messageModel.hydrate(plainMessage);
+      chatToLatestMatchingMessageMapping[message.chat.toHexString()] = message;
+    });
+
+    return chatToLatestMatchingMessageMapping;
+  }
+
   async createMessage(
     options: CreateMessageInMongoOptions,
   ): Promise<MessageMongoDocument> {

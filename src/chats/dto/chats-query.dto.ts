@@ -4,6 +4,11 @@ import { Transform } from 'class-transformer';
 import { transformJson } from '../../common/utils/transform-json.util';
 
 export class ChatsQueryDto {
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  query?: string;
+
   @ApiPropertyOptional({
     type: 'string',
     enum: ['NEWER_FIRST', 'UNREAD_FIRST'],

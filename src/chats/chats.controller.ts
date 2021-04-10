@@ -8,7 +8,6 @@ import {
   ClassSerializerInterceptor,
   UseGuards,
   UsePipes,
-  ValidationPipe,
   Query,
 } from '@nestjs/common';
 import { ChatsService } from './chats.service';
@@ -21,15 +20,11 @@ import { PersonalChatDto } from './dto/personal-chat-from-mongo.dto';
 import { UserMongoDocument } from '../users/schemas/user.schema';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { createValidationPipe } from '../common/utils/create-validation-pipe.util';
 
 @Controller()
 @ApiTags('Chat')
-@UsePipes(
-  new ValidationPipe({
-    whitelist: true,
-    transform: true,
-  }),
-)
+@UsePipes(createValidationPipe())
 export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 

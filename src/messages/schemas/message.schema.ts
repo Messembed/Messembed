@@ -26,7 +26,7 @@ export class MessageMongo {
   @Prop({ type: String, ref: 'UserMongo' })
   user: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: 'text' })
   content: string;
 
   @Prop({ type: Boolean })

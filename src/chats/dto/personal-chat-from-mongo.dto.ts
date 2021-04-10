@@ -1,4 +1,5 @@
-import { MessageMongo } from '../../messages/schemas/message.schema';
+import { MessageMongoDocument } from '../../messages/schemas/message.schema';
+import { MessageForFrontend } from '../../messages/dto/message-for-frontend.dto';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { UserMongo } from '../../users/schemas/user.schema';
@@ -23,8 +24,8 @@ export class PersonalChatDto {
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
   externalMetadata?: Record<string, unknown> | null;
 
-  @ApiPropertyOptional({ type: () => Object })
-  lastMessage: MessageMongo;
+  @ApiPropertyOptional({ type: () => MessageForFrontend })
+  lastMessage: MessageForFrontend;
 
   @ApiProperty({ type: () => Object })
   companion: UserMongo;
@@ -34,15 +35,38 @@ export class PersonalChatDto {
 
   static createFromChats(
     chats: ChatMongoDocument[],
-    userId: string,
+    currentUserId: string,
+    options?: {
+      chatToLatestMatchingMessageMapping?: {
+        [chatId: string]: MessageMongoDocument;
+      };
+    },
   ): PersonalChatDto[] {
-    return chats.map(chat => this.createFromChat(chat, userId));
+    return chats.map(chat =>
+      this.createFromChat(chat, currentUserId, {
+        overrideLatestMessage:
+          options && options.chatToLatestMatchingMessageMapping
+            ? options.chatToLatestMatchingMessageMapping[chat._id.toString()]
+            : chat.lastMessage,
+      }),
+    );
   }
 
   static createFromChat(
     chat: ChatMongoDocument,
-    userId: string,
+    currentUserId: string,
+    options?: { overrideLatestMessage?: MessageMongoDocument },
   ): PersonalChatDto {
+    const lastMessage: MessageForFrontend =
+      options && options.overrideLatestMessage
+        ? MessageForFrontend.fromMessage(
+            options.overrideLatestMessage,
+            currentUserId,
+          )
+        : chat.lastMessage
+        ? MessageForFrontend.fromMessage(chat.lastMessage, currentUserId)
+        : null;
+
     return new PersonalChatDto({
       _id: chat._id,
       createdAt: chat.createdAt,
@@ -50,13 +74,13 @@ export class PersonalChatDto {
       deletedAt: chat.deletedAt,
       active: chat.active,
       externalMetadata: chat.externalMetadata,
-      lastMessage: chat.lastMessage ? chat.lastMessage.toJSON() : null,
+      lastMessage,
       companion:
-        chat.firstCompanion._id === userId
+        chat.firstCompanion._id === currentUserId
           ? chat.secondCompanion.toJSON()
           : chat.firstCompanion.toJSON(),
       unreadMessagesCount:
-        chat.firstCompanion._id === userId
+        chat.firstCompanion._id === currentUserId
           ? chat.notReadByFirstCompanionMessagesCount
           : chat.notReadBySecondCompanionMessagesCount,
     });
