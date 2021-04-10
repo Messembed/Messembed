@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+
 export interface UserDocument extends UserModel, Document {
   _id: string;
 }
