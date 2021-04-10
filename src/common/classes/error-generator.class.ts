@@ -15,6 +15,7 @@ export class ErrorGenerator {
       {
         statusCode,
         code,
+        message,
         ...additional,
       },
       statusCode,

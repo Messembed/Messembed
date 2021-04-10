@@ -6,6 +6,7 @@ export type MessageDocument = MessageModel & Document;
 
 @Schema({
   minimize: false,
+  collection: 'messagemongos',
 })
 export class MessageModel {
   @Prop({ type: Date, required: true })
@@ -31,6 +32,9 @@ export class MessageModel {
 
   @Prop({ type: Boolean })
   read: boolean;
+
+  @Prop({ type: Array })
+  attachments?: Record<string, unknown>[];
 
   @Prop({ type: Object })
   externalMetadata?: Record<string, unknown> | null;

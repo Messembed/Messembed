@@ -39,6 +39,13 @@ export class MessageForFrontend {
   @ApiPropertyOptional()
   privateExternalMetadata?: Record<string, unknown> | null;
 
+  @ApiPropertyOptional({
+    type: Object,
+    isArray: true,
+    additionalProperties: true,
+  })
+  attachments?: Record<string, unknown>[];
+
   static fromMessages(
     messages: MessageDocument[],
     currentUserId?: string,

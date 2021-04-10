@@ -26,6 +26,29 @@ export class MessagesService {
     private readonly messageModel: Model<MessageDocument>,
   ) {}
 
+  async listMessagesWithAttachments(
+    currentUserId: string,
+    chatId: Types.ObjectId,
+  ): Promise<MessageForFrontend[]> {
+    await this.chatsService.getChatByIdAndCompanionOrFailHttp(
+      chatId,
+      currentUserId,
+    );
+
+    const messagesWithAttachments = await this.messageModel
+      .find({
+        chat: chatId,
+        attachments: {
+          $exists: true,
+          $type: 'array',
+          $ne: [],
+        },
+      })
+      .sort({ createdAt: -1 });
+
+    return MessageForFrontend.fromMessages(messagesWithAttachments);
+  }
+
   async getLatestMatchingMessageInChatsOfUser(
     userId: string,
     query: string,
@@ -54,6 +77,7 @@ export class MessagesService {
             user: { $last: '$user' },
             content: { $last: '$content' },
             read: { $last: '$read' },
+            attachments: { $last: '$attachments' },
             externalMetadata: { $last: '$externalMetadata' },
             privateExternalMetadata: { $last: '$privateExternalMetadata' },
           },
@@ -69,6 +93,7 @@ export class MessagesService {
             user: 1,
             content: 1,
             read: 1,
+            attachments: 1,
             externalMetadata: 1,
             privateExternalMetadata: 1,
           },
@@ -88,40 +113,41 @@ export class MessagesService {
     return chatToLatestMatchingMessageMapping;
   }
 
-  async createMessage(options: CreateMessageParams): Promise<MessageDocument> {
+  async createMessage(params: CreateMessageParams): Promise<MessageDocument> {
     const chat = await this.chatsService.getChatByIdAndCompanionOrFailHttp(
-      options.chatId,
-      options.userId,
+      params.chatId,
+      params.userId,
     );
 
     if (!chat.active) {
       throw ErrorGenerator.create(
         'CHAT_IS_INACTIVE',
-        `Chat with ID ${options.chatId} is inactive.`,
+        `Chat with ID ${params.chatId} is inactive.`,
       );
     }
 
     const message = await this.messageModel.create({
       createdAt: new Date(),
-      chat: options.chatId,
-      user: options.userId,
-      content: options.content,
+      chat: params.chatId,
+      user: params.userId,
+      content: params.content,
       read: false,
-      externalMetadata: options.externalMetadata,
-      privateExternalMetadata: options.privateExternalMetadata,
+      attachments: params.attachments,
+      externalMetadata: params.externalMetadata,
+      privateExternalMetadata: params.privateExternalMetadata,
     });
 
     await this.updatesService.createUpdate({
-      chatId: options.chatId,
+      chatId: params.chatId,
       type: 'new_message',
       message,
     });
 
     await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
       chat._id,
-      chat.firstCompanion._id === options.userId ? 1 : 2,
+      chat.firstCompanion._id === params.userId ? 1 : 2,
     );
-    await this.chatsService.setLastMessageOfChat(options.chatId, message);
+    await this.chatsService.setLastMessageOfChat(params.chatId, message);
 
     return message;
   }

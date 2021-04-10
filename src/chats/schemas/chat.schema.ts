@@ -10,6 +10,7 @@ export type ChatDocument = ChatModel & Document;
 
 @Schema({
   minimize: false,
+  collection: 'chatmongos',
 })
 export class ChatModel {
   _id: Types.ObjectId;

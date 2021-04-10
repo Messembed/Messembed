@@ -11,6 +11,7 @@ export type UpdateDocument = UpdateModel & Document;
 
 @Schema({
   minimize: false,
+  collection: 'updates',
 })
 export class UpdateModel {
   _id: Types.ObjectId;

@@ -19,6 +19,7 @@ import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserDocument } from '../users/schemas/user.schema';
+import { MessageForFrontend } from './dto/message-for-frontend.dto';
 
 @Controller()
 @ApiTags('Messages')
@@ -51,9 +52,6 @@ export class MessagesController {
     ).toJSON();
   }
 
-  /**
-   * @todo we need to remove external service auth strategy, as we have special MessagesAdminController
-   */
   @Get('chats/:chatId/messages')
   @UseGuards(JwtAuthGuard)
   @UsePipes(
@@ -62,7 +60,7 @@ export class MessagesController {
       transform: true,
     }),
   )
-  @ApiOkResponse({ type: () => Object, isArray: true })
+  @ApiOkResponse({ type: () => PaginatedMessagesDto, isArray: true })
   async getMessages(
     @Param() { chatId }: ChatPathDto,
     @Query() filters: GetMessagesFiltersDto,
@@ -72,6 +70,25 @@ export class MessagesController {
       currentUser._id,
       Types.ObjectId(chatId),
       filters,
+    );
+  }
+
+  @Get('chats/:chatId/messages-with-attachments')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
+  @ApiOkResponse({ type: () => MessageForFrontend, isArray: true })
+  async getAttachments(
+    @Param() { chatId }: ChatPathDto,
+    @CurrentUser() currentUser: UserDocument,
+  ): Promise<MessageForFrontend[]> {
+    return this.messagesService.listMessagesWithAttachments(
+      currentUser._id,
+      Types.ObjectId(chatId),
     );
   }
 }

@@ -6,6 +6,7 @@ export interface UserDocument extends UserModel, Document {
 
 @Schema({
   minimize: false,
+  collection: 'usermongos',
 })
 export class UserModel {
   @Prop({ type: String })

@@ -1,4 +1,4 @@
-import { IsObject, IsOptional, IsMongoId } from 'class-validator';
+import { IsObject, IsOptional, IsMongoId, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMessageAsAdminDto {
@@ -18,4 +18,14 @@ export class CreateMessageAsAdminDto {
   @IsObject()
   @IsOptional()
   privateExternalMetadata?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    type: Object,
+    isArray: true,
+    additionalProperties: true,
+  })
+  @IsObject({ each: true })
+  @IsArray()
+  @IsOptional()
+  attachments?: Record<string, unknown>[];
 }
