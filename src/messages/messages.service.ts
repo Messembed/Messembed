@@ -339,7 +339,9 @@ export class MessagesService {
     const messagesQuery = this.messageModel
       .find({
         chat: chatId,
-        ...(createdAtCondition ? { createdAt: createdAtCondition } : {}),
+        ...(!_.isEmpty(createdAtCondition)
+          ? { createdAt: createdAtCondition }
+          : {}),
         ...(!_.isNil(filters.read) ? { read: filters.read } : {}),
       })
       .sort({ createdAt: 'ASC' });
