@@ -38,7 +38,7 @@ export class MessagesAdminController {
     @Body() createDto: CreateMessageAsAdminDto,
   ): Promise<any> {
     return (
-      await this.messagesService.createMessage({
+      await this.messagesService.sendMessage({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
         userId: createDto.userId,

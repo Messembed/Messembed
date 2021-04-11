@@ -6,6 +6,16 @@ import { CreateUpdateInput } from './interfaces/create-update-input.interface';
 import { UpdateDto } from './dto/update.dto';
 import { UpdateModel, UpdateDocument } from './schemas/update.schema';
 import { UpdatesGateway } from './updates.gateway';
+import { UserDocument } from '../users/schemas/user.schema';
+
+interface CreateUpdateOptions {
+  /**
+   * If update is broadcasted to a chat you can
+   * exclude some users from getting this update,
+   * for example if the user is blocked from getting new messages
+   */
+  excludeUsersFromBroadcast?: string[];
+}
 
 @Injectable()
 export class UpdatesService {
@@ -18,22 +28,34 @@ export class UpdatesService {
   ) {}
 
   async getUpdatesForUser(
-    currentUserId: string,
+    currentUser: UserDocument,
     creationDateOfLastFetchedUpdate: Date,
   ): Promise<UpdateDto[]> {
     const idsOfChatsOfCurrentUser = await this.chatsService.listIdsOfChatsOfUser(
-      currentUserId,
+      currentUser._id,
     );
+
+    const additionalCreatedAt =
+      currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
+      currentUser.blockStatusUpdatedAt
+        ? { $lt: currentUser.blockStatusUpdatedAt }
+        : {};
 
     const updates = await this.updateModel.find({
       chatId: { $in: idsOfChatsOfCurrentUser },
-      createdAt: { $gt: creationDateOfLastFetchedUpdate },
+      createdAt: {
+        $gt: creationDateOfLastFetchedUpdate,
+        ...additionalCreatedAt,
+      },
     });
 
-    return UpdateDto.fromUpdates(updates, currentUserId);
+    return UpdateDto.fromUpdates(updates, currentUser._id);
   }
 
-  async createUpdate(data: CreateUpdateInput): Promise<UpdateDocument> {
+  async createUpdate(
+    data: CreateUpdateInput,
+    options?: CreateUpdateOptions,
+  ): Promise<UpdateDocument> {
     const update = await this.updateModel.create({
       _id: new Types.ObjectId(),
       createdAt: data.chat
@@ -51,8 +73,17 @@ export class UpdatesService {
       update.chatId,
     );
 
-    this.updatesGateway.sendUpdate(chat.firstCompanion._id, update);
-    this.updatesGateway.sendUpdate(chat.secondCompanion._id, update);
+    if (
+      !options?.excludeUsersFromBroadcast?.includes(chat.firstCompanion._id)
+    ) {
+      this.updatesGateway.sendUpdate(chat.firstCompanion._id, update);
+    }
+
+    if (
+      !options?.excludeUsersFromBroadcast?.includes(chat.secondCompanion._id)
+    ) {
+      this.updatesGateway.sendUpdate(chat.secondCompanion._id, update);
+    }
 
     return update;
   }

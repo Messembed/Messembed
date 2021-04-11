@@ -92,22 +92,24 @@ export class UpdatesGateway
       Types.ObjectId.createFromHexString(chatId),
     );
 
-    const companionsId =
+    const companion =
       chat.firstCompanion._id === user._id
-        ? chat.secondCompanion._id
-        : chat.firstCompanion._id;
+        ? chat.secondCompanion
+        : chat.firstCompanion;
 
-    const sockets = this.connectedSockets[companionsId];
+    if (companion.blockStatus !== 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES') {
+      const socketsOfCompanion = this.connectedSockets[companion._id];
 
-    if (!sockets) {
-      return;
-    }
+      if (!socketsOfCompanion) {
+        return;
+      }
 
-    sockets.forEach(socket => {
-      socket.emit('writing', {
-        chatId,
+      socketsOfCompanion.forEach(socket => {
+        socket.emit('writing', {
+          chatId,
+        });
       });
-    });
+    }
   }
 
   @SubscribeMessage('send_message')
@@ -123,7 +125,7 @@ export class UpdatesGateway
   ): Promise<void> {
     const user = socket.request.user as UserDocument;
 
-    await this.messagesService.createMessage({
+    await this.messagesService.sendMessage({
       ...createMessageData,
       chatId: Types.ObjectId.createFromHexString(createMessageData.chatId),
       userId: user._id,

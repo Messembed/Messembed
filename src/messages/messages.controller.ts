@@ -44,7 +44,7 @@ export class MessagesController {
     @CurrentUser() currentUser: UserDocument,
   ): Promise<any> {
     return (
-      await this.messagesService.createMessage({
+      await this.messagesService.sendMessage({
         ...createDto,
         chatId: new Types.ObjectId(chatId),
         userId: currentUser._id,
@@ -67,7 +67,7 @@ export class MessagesController {
     @CurrentUser() currentUser: UserDocument,
   ): Promise<PaginatedMessagesDto> {
     return this.messagesService.getPaginatedMessagesForUser(
-      currentUser._id,
+      currentUser,
       Types.ObjectId(chatId),
       filters,
     );
@@ -87,7 +87,7 @@ export class MessagesController {
     @CurrentUser() currentUser: UserDocument,
   ): Promise<MessageForFrontend[]> {
     return this.messagesService.listMessagesWithAttachments(
-      currentUser._id,
+      currentUser,
       Types.ObjectId(chatId),
     );
   }

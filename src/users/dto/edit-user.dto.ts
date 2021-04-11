@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsObject, IsOptional } from 'class-validator';
+import { IsIn, IsObject, IsOptional, IsString } from 'class-validator';
 
 export class EditUserDto {
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
@@ -11,4 +11,13 @@ export class EditUserDto {
   @IsObject()
   @IsOptional()
   privateExternalMetadata?: Record<string, unknown>;
+
+  @ApiPropertyOptional({
+    type: String,
+    enum: ['CANT_SEND_AND_RECEIVE_NEW_MESSAGES'],
+  })
+  @IsString()
+  @IsIn(['CANT_SEND_AND_RECEIVE_NEW_MESSAGES'])
+  @IsOptional()
+  blockStatus?: 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' | null;
 }

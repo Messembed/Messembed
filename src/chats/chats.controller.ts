@@ -45,7 +45,7 @@ export class ChatsController {
     @Query() query: ChatsQueryDto,
     @CurrentUser() currentUser: UserDocument,
   ): Promise<PersonalChatDto[]> {
-    return this.chatsService.listPersonalChatsOfUser(currentUser._id, query);
+    return this.chatsService.listPersonalChatsOfUser(currentUser, query);
   }
 
   @Get('user/personal-chats/:chatId')

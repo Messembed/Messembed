@@ -21,13 +21,16 @@ export class UsersService {
 
   async createUser(createDto: CreateUserDto): Promise<UserDocument> {
     try {
+      const createdAt = new Date();
       const user = await this.userModel.create({
         _id: createDto.id,
-        createdAt: new Date(),
+        createdAt,
         updatedAt: null,
         deletedAt: null,
         externalMetadata: createDto.externalMetadata,
         privateExternalMetadata: createDto.privateExternalMetadata,
+        blockStatus: createDto.blockStatus || null,
+        blockStatusUpdatedAt: createDto.blockStatus ? createdAt : null,
       });
       return user;
     } catch (error) {
@@ -55,6 +58,14 @@ export class UsersService {
 
     if (!_.isNil(editDto.privateExternalMetadata)) {
       user.privateExternalMetadata = editDto.privateExternalMetadata;
+    }
+
+    if (
+      !_.isNil(editDto.blockStatus) &&
+      user.blockStatus !== editDto.blockStatus
+    ) {
+      user.blockStatusUpdatedAt = new Date();
+      user.blockStatus = editDto.blockStatus;
     }
 
     await user.save();

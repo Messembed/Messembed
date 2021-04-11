@@ -42,6 +42,14 @@ export class ChatsService {
     const currentUser = await this.usersService.getUserByIdOrFail(
       currentUserId,
     );
+
+    if (currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES') {
+      throw ErrorGenerator.create(
+        'BLOCK_STATUS_DOES_NOT_ALLOW',
+        `Your current block status is ${currentUser.blockStatus}, which does not allow you to create chats.`,
+      );
+    }
+
     const secondCompanion = await this.usersService.getUserByIdOrFail(
       createData.companionId,
     );
@@ -202,7 +210,7 @@ export class ChatsService {
    * а преобразовывает их в PersonalChatDto, что намного удобнее для клиентов
    */
   async listPersonalChatsOfUser(
-    currentUserId: string,
+    currentUser: UserDocument,
     query?: ChatsQueryDto,
   ): Promise<PersonalChatDto[]> {
     const additionalFilters: FilterQuery<ChatDocument> = {};
@@ -216,28 +224,35 @@ export class ChatsService {
       _.assign(additionalFilters, externalMetadataFilters);
     }
 
-    let chatToLatestMatchingMessageMapping: {
+    let chatToLatestMessageMappingForOverwriting: {
       [chatId: string]: MessageDocument;
     } | null = null;
 
     if (query && query.query) {
-      chatToLatestMatchingMessageMapping = await this.messagesService.getLatestMatchingMessageInChatsOfUser(
-        currentUserId,
+      chatToLatestMessageMappingForOverwriting = await this.messagesService.getLatestMatchingMessageInChatsOfUser(
+        currentUser,
         query.query,
       );
 
-      const matchingChatIds = _.keys(chatToLatestMatchingMessageMapping);
+      const matchingChatIds = _.keys(chatToLatestMessageMappingForOverwriting);
       additionalFilters._id = {
         $in: matchingChatIds.map(id => new Types.ObjectId(id)),
       };
+    } else if (
+      currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
+      currentUser.blockStatusUpdatedAt
+    ) {
+      chatToLatestMessageMappingForOverwriting = await this.messagesService.getLatestMessagesForBlockedUser(
+        currentUser,
+      );
     }
 
     let chats = await this.chatModel
       .find({
         active: true,
         $or: [
-          { 'firstCompanion._id': currentUserId },
-          { 'secondCompanion._id': currentUserId },
+          { 'firstCompanion._id': currentUser._id },
+          { 'secondCompanion._id': currentUser._id },
         ],
         ...additionalFilters,
       })
@@ -249,12 +264,12 @@ export class ChatsService {
 
       chats.forEach(chat => {
         if (
-          chat.firstCompanion._id === currentUserId &&
+          chat.firstCompanion._id === currentUser._id &&
           chat.notReadByFirstCompanionMessagesCount > 0
         ) {
           unreadChats.push(chat);
         } else if (
-          chat.secondCompanion._id === currentUserId &&
+          chat.secondCompanion._id === currentUser._id &&
           chat.notReadBySecondCompanionMessagesCount > 0
         ) {
           unreadChats.push(chat);
@@ -268,10 +283,12 @@ export class ChatsService {
 
     const personalChats = PersonalChatDto.createFromChats(
       chats,
-      currentUserId,
+      currentUser._id,
       {
-        chatToLatestMatchingMessageMapping:
-          query && query.query ? chatToLatestMatchingMessageMapping : null,
+        chatToLatestMessageMappingForOverwriting:
+          query && query.query
+            ? chatToLatestMessageMappingForOverwriting
+            : null,
       },
     );
 

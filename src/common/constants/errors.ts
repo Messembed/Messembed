@@ -14,4 +14,6 @@ export const errors = {
   CHAT_IS_INACTIVE: HttpStatus.NOT_ACCEPTABLE,
 
   INVALID_INPUT: HttpStatus.BAD_REQUEST,
+
+  BLOCK_STATUS_DOES_NOT_ALLOW: HttpStatus.UNAUTHORIZED,
 };

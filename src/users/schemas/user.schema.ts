@@ -27,6 +27,12 @@ export class UserModel {
 
   @Prop({ type: Object })
   privateExternalMetadata?: Record<string, unknown> | null;
+
+  @Prop({ type: String, required: false })
+  blockStatus?: 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' | null;
+
+  @Prop({ type: Date, required: false })
+  blockStatusUpdatedAt?: Date | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

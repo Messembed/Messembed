@@ -37,7 +37,7 @@ export class PersonalChatDto {
     chats: ChatDocument[],
     currentUserId: string,
     options?: {
-      chatToLatestMatchingMessageMapping?: {
+      chatToLatestMessageMappingForOverwriting?: {
         [chatId: string]: MessageDocument;
       };
     },
@@ -45,8 +45,10 @@ export class PersonalChatDto {
     return chats.map(chat =>
       this.createFromChat(chat, currentUserId, {
         overrideLatestMessage:
-          options && options.chatToLatestMatchingMessageMapping
-            ? options.chatToLatestMatchingMessageMapping[chat._id.toString()]
+          options && options.chatToLatestMessageMappingForOverwriting
+            ? options.chatToLatestMessageMappingForOverwriting[
+                chat._id.toString()
+              ]
             : chat.lastMessage,
       }),
     );

@@ -3,7 +3,7 @@ import { CreateMessageParams } from './interfaces/create-message-params.interfac
 import _ from 'lodash';
 import { ChatsService } from '../chats/chats.service';
 import { MessageModel, MessageDocument } from './schemas/message.schema';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { PaginatedMessagesDto } from './dto/paginated-messages.dto';
 import { GetMessagesFiltersDto } from './dto/get-messages-filters.dto';
 import { MessageForFrontend } from './dto/message-for-frontend.dto';
@@ -14,6 +14,8 @@ import { UpdatesService } from '../updates/updates.service';
 import { ChatDocument } from '../chats/schemas/chat.schema';
 import { PaginatedMessagesForAdminDto } from './dto/paginated-messages-for-admin.dto';
 import { ErrorGenerator } from '../common/classes/error-generator.class';
+import { UsersService } from '../users/users.service';
+import { UserDocument } from '../users/schemas/user.schema';
 
 @Injectable()
 export class MessagesService {
@@ -22,18 +24,28 @@ export class MessagesService {
     private readonly chatsService: ChatsService,
     @Inject(forwardRef(() => UpdatesService))
     private readonly updatesService: UpdatesService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
     @InjectModel(MessageModel.name)
     private readonly messageModel: Model<MessageDocument>,
   ) {}
 
   async listMessagesWithAttachments(
-    currentUserId: string,
+    currentUser: UserDocument,
     chatId: Types.ObjectId,
   ): Promise<MessageForFrontend[]> {
     await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       chatId,
-      currentUserId,
+      currentUser._id,
     );
+
+    const additionalFilters: FilterQuery<MessageDocument> =
+      currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
+      currentUser.blockStatusUpdatedAt
+        ? {
+            createdAt: { $lt: currentUser.blockStatusUpdatedAt },
+          }
+        : {};
 
     const messagesWithAttachments = await this.messageModel
       .find({
@@ -43,6 +55,7 @@ export class MessagesService {
           $type: 'array',
           $ne: [],
         },
+        ...additionalFilters,
       })
       .sort({ createdAt: -1 });
 
@@ -50,16 +63,27 @@ export class MessagesService {
   }
 
   async getLatestMatchingMessageInChatsOfUser(
-    userId: string,
+    currentUser: UserDocument,
     query: string,
   ): Promise<{ [chatId: string]: MessageDocument }> {
-    const chatIds = await this.chatsService.listIdsOfChatsOfUser(userId);
+    const chatIds = await this.chatsService.listIdsOfChatsOfUser(
+      currentUser._id,
+    );
+
+    const additionalFilters: FilterQuery<MessageDocument> =
+      currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
+      currentUser.blockStatusUpdatedAt
+        ? {
+            createdAt: { $lt: currentUser.blockStatusUpdatedAt },
+          }
+        : {};
 
     const plainMessages: any[] = await this.messageModel
       .aggregate([
         {
           $match: {
             chat: { $in: chatIds },
+            ...additionalFilters,
             $text: { $search: query },
           },
         },
@@ -113,11 +137,98 @@ export class MessagesService {
     return chatToLatestMatchingMessageMapping;
   }
 
-  async createMessage(params: CreateMessageParams): Promise<MessageDocument> {
+  async getLatestMessagesForBlockedUser(
+    currentUser: UserDocument,
+  ): Promise<{ [chatId: string]: MessageDocument }> {
+    const chatIds = await this.chatsService.listIdsOfChatsOfUser(
+      currentUser._id,
+    );
+
+    const additionalFilters: FilterQuery<MessageDocument> =
+      currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
+      currentUser.blockStatusUpdatedAt
+        ? {
+            createdAt: { $lt: currentUser.blockStatusUpdatedAt },
+          }
+        : {};
+
+    const plainMessages: any[] = await this.messageModel
+      .aggregate([
+        {
+          $match: {
+            chat: { $in: chatIds },
+            ...additionalFilters,
+          },
+        },
+        {
+          $sort: { createdAt: 1 },
+        },
+        {
+          $group: {
+            _id: '$chat',
+            lastId: { $last: '$_id' },
+            createdAt: { $last: '$createdAt' },
+            updatedAt: { $last: '$updatedAt' },
+            deletedAt: { $last: '$deletedAt' },
+            editedAt: { $last: '$editedAt' },
+            user: { $last: '$user' },
+            content: { $last: '$content' },
+            read: { $last: '$read' },
+            attachments: { $last: '$attachments' },
+            externalMetadata: { $last: '$externalMetadata' },
+            privateExternalMetadata: { $last: '$privateExternalMetadata' },
+          },
+        },
+        {
+          $project: {
+            _id: '$lastId',
+            chat: '$_id',
+            createdAt: 1,
+            updatedAt: 1,
+            deletedAt: 1,
+            editedAt: 1,
+            user: 1,
+            content: 1,
+            read: 1,
+            attachments: 1,
+            externalMetadata: 1,
+            privateExternalMetadata: 1,
+          },
+        },
+      ])
+      .exec();
+
+    const chatToLatestMessageMapping: {
+      [chatId: string]: MessageDocument;
+    } = {};
+
+    plainMessages.forEach(plainMessage => {
+      const message = this.messageModel.hydrate(plainMessage);
+      chatToLatestMessageMapping[message.chat.toHexString()] = message;
+    });
+
+    return chatToLatestMessageMapping;
+  }
+
+  /**
+   * This method is used by admins and users
+   */
+  async sendMessage(params: CreateMessageParams): Promise<MessageDocument> {
     const chat = await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       params.chatId,
       params.userId,
     );
+
+    const sendingUser = await this.usersService.getUserByIdOrFail(
+      params.userId,
+    );
+
+    if (sendingUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES') {
+      throw ErrorGenerator.create(
+        'BLOCK_STATUS_DOES_NOT_ALLOW',
+        `You current block status is ${sendingUser.blockStatus}, which does not allow you to send messages.`,
+      );
+    }
 
     if (!chat.active) {
       throw ErrorGenerator.create(
@@ -137,11 +248,24 @@ export class MessagesService {
       privateExternalMetadata: params.privateExternalMetadata,
     });
 
-    await this.updatesService.createUpdate({
-      chatId: params.chatId,
-      type: 'new_message',
-      message,
-    });
+    const companion =
+      chat.firstCompanion._id === params.userId
+        ? chat.secondCompanion
+        : chat.firstCompanion;
+
+    await this.updatesService.createUpdate(
+      {
+        chatId: params.chatId,
+        type: 'new_message',
+        message,
+      },
+      {
+        excludeUsersFromBroadcast:
+          companion.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES'
+            ? [companion._id]
+            : [],
+      },
+    );
 
     await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
       chat._id,
@@ -153,20 +277,27 @@ export class MessagesService {
   }
 
   async getPaginatedMessagesForUser(
-    currentUserId: string,
+    currentUser: UserDocument,
     chatId: Types.ObjectId,
     filters?: GetMessagesFiltersDto,
   ): Promise<PaginatedMessagesDto> {
     await this.chatsService.getChatByIdAndCompanionOrFailHttp(
       chatId,
-      currentUserId,
+      currentUser._id,
     );
+
+    if (
+      currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
+      currentUser.blockStatusUpdatedAt
+    ) {
+      filters.before = currentUser.blockStatusUpdatedAt;
+    }
 
     const messages = await this.getMessagesByChatId(chatId, filters);
 
     const messagesForFrontend = MessageForFrontend.fromMessages(
       messages,
-      currentUserId,
+      currentUser._id,
     );
 
     return new PaginatedMessagesDto({
@@ -191,15 +322,19 @@ export class MessagesService {
     });
   }
 
-  async getMessagesByChatId(
+  private async getMessagesByChatId(
     chatId: Types.ObjectId,
     filters?: GetMessagesFiltersDto,
   ): Promise<MessageDocument[]> {
-    const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)
-      ? { $gte: filters?.after }
-      : !_.isNil(filters?.before)
-      ? { $lt: filters?.before }
-      : undefined;
+    const createdAtCondition: Condition<Date> = {};
+
+    if (!_.isNil(filters?.after)) {
+      createdAtCondition.$gte = filters?.after;
+    }
+
+    if (!_.isNil(filters?.before)) {
+      createdAtCondition.$lt = filters?.before;
+    }
 
     const messagesQuery = this.messageModel
       .find({
@@ -266,7 +401,7 @@ export class MessagesService {
     });
   }
 
-  async getAllMessagesForAdmin(
+  private async getAllMessagesForAdmin(
     filters?: GetMessagesFiltersDto,
   ): Promise<MessageDocument[]> {
     const createdAtCondition: Condition<Date> = !_.isNil(filters?.after)

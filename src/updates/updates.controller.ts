@@ -36,7 +36,7 @@ export class UpdatesController {
     @CurrentUser() currentUser: UserDocument,
   ): Promise<UpdateDto[]> {
     const updates = await this.updatesService.getUpdatesForUser(
-      currentUser._id,
+      currentUser,
       filters.creationDateOfLastFetchedUpdate,
     );
 
