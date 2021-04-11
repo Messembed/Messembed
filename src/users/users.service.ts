@@ -60,7 +60,12 @@ export class UsersService {
       user.privateExternalMetadata = editDto.privateExternalMetadata;
     }
 
-    if (
+    if (editDto.removeBlockStatus) {
+      if (user.blockStatus) {
+        user.blockStatusUpdatedAt = new Date();
+        user.blockStatus = null;
+      }
+    } else if (
       !_.isNil(editDto.blockStatus) &&
       user.blockStatus !== editDto.blockStatus
     ) {

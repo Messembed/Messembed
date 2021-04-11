@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class EditUserDto {
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
@@ -20,4 +26,11 @@ export class EditUserDto {
   @IsIn(['CANT_SEND_AND_RECEIVE_NEW_MESSAGES'])
   @IsOptional()
   blockStatus?: 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' | null;
+
+  @ApiPropertyOptional({
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  removeBlockStatus?: boolean;
 }
