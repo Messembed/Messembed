@@ -439,4 +439,16 @@ export class ChatsService {
       ),
     ]);
   }
+
+  async addToDeletedForToLastMessageOfChat(
+    chatId: Types.ObjectId,
+    deletedFor: string,
+  ): Promise<void> {
+    await this.chatModel.updateOne(
+      {
+        _id: chatId,
+      },
+      { $addToSet: { 'lastMessage.deletedFor': deletedFor } },
+    );
+  }
 }

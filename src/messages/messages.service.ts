@@ -55,6 +55,7 @@ export class MessagesService {
           $type: 'array',
           $ne: [],
         },
+        deletedFor: { $not: { $all: [currentUser._id] } },
         ...additionalFilters,
       })
       .sort({ createdAt: -1 });
@@ -83,6 +84,7 @@ export class MessagesService {
         {
           $match: {
             chat: { $in: chatIds },
+            deletedFor: { $not: { $all: [currentUser._id] } },
             ...additionalFilters,
             $text: { $search: query },
           },
@@ -157,6 +159,7 @@ export class MessagesService {
         {
           $match: {
             chat: { $in: chatIds },
+            deletedFor: { $not: { $all: [currentUser._id] } },
             ...additionalFilters,
           },
         },
@@ -293,7 +296,9 @@ export class MessagesService {
       filters.before = currentUser.blockStatusUpdatedAt;
     }
 
-    const messages = await this.getMessagesByChatId(chatId, filters);
+    const messages = await this.getMessagesByChatId(chatId, filters, {
+      notDeletedFor: currentUser._id,
+    });
 
     const messagesForFrontend = MessageForFrontend.fromMessages(
       messages,
@@ -325,6 +330,7 @@ export class MessagesService {
   private async getMessagesByChatId(
     chatId: Types.ObjectId,
     filters?: GetMessagesFiltersDto,
+    options?: { notDeletedFor?: string },
   ): Promise<MessageDocument[]> {
     const createdAtCondition: Condition<Date> = {};
 
@@ -339,6 +345,9 @@ export class MessagesService {
     const messagesQuery = this.messageModel
       .find({
         chat: chatId,
+        ...(options?.notDeletedFor
+          ? { deletedFor: { $not: { $all: [options.notDeletedFor] } } }
+          : {}),
         ...(!_.isEmpty(createdAtCondition)
           ? { createdAt: createdAtCondition }
           : {}),
@@ -429,5 +438,27 @@ export class MessagesService {
     const messages = await messagesQuery.exec();
 
     return messages;
+  }
+
+  public async clearChatHistoryForUser(
+    currentUser: UserDocument,
+    chatId: Types.ObjectId,
+  ): Promise<void> {
+    await this.chatsService.getChatByIdAndCompanionOrFailHttp(
+      chatId,
+      currentUser._id,
+    );
+
+    await this.messageModel.updateMany(
+      {
+        chat: chatId,
+      },
+      { $addToSet: { deletedFor: currentUser._id } },
+    );
+
+    await this.chatsService.addToDeletedForToLastMessageOfChat(
+      chatId,
+      currentUser._id,
+    );
   }
 }

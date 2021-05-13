@@ -59,14 +59,18 @@ export class PersonalChatDto {
     currentUserId: string,
     options?: { overrideLatestMessage?: MessageDocument },
   ): PersonalChatDto {
-    const lastMessage: MessageForFrontend =
+    const lastMessageAsDocument: MessageDocument =
       options && options.overrideLatestMessage
-        ? MessageForFrontend.fromMessage(
-            options.overrideLatestMessage,
-            currentUserId,
-          )
+        ? options.overrideLatestMessage
         : chat.lastMessage
-        ? MessageForFrontend.fromMessage(chat.lastMessage, currentUserId)
+        ? chat.lastMessage
+        : null;
+
+    const lastMessage: MessageForFrontend =
+      lastMessageAsDocument &&
+      (!lastMessageAsDocument.deletedFor ||
+        !lastMessageAsDocument.deletedFor.includes(currentUserId))
+        ? MessageForFrontend.fromMessage(lastMessageAsDocument, currentUserId)
         : null;
 
     return new PersonalChatDto({

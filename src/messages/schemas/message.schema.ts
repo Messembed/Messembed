@@ -41,6 +41,13 @@ export class MessageModel {
 
   @Prop({ type: Object })
   privateExternalMetadata?: Record<string, unknown> | null;
+
+  @Prop({ type: mongoose.Schema.Types.Array })
+  deletedFor?: string[];
 }
 
 export const MessageSchema = SchemaFactory.createForClass(MessageModel);
+
+MessageSchema.index('deletedFor');
+MessageSchema.index('createdAt');
+MessageSchema.index('chat');

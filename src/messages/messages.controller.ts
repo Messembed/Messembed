@@ -8,6 +8,7 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  Delete,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
@@ -87,6 +88,24 @@ export class MessagesController {
     @CurrentUser() currentUser: UserDocument,
   ): Promise<MessageForFrontend[]> {
     return this.messagesService.listMessagesWithAttachments(
+      currentUser,
+      Types.ObjectId(chatId),
+    );
+  }
+
+  @Delete('chats/:chatId/messages')
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  )
+  async clearChatHistory(
+    @Param() { chatId }: ChatPathDto,
+    @CurrentUser() currentUser: UserDocument,
+  ): Promise<void> {
+    await this.messagesService.clearChatHistoryForUser(
       currentUser,
       Types.ObjectId(chatId),
     );
