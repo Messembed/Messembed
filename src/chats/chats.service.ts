@@ -249,7 +249,7 @@ export class ChatsService {
 
     let chats = await this.chatModel
       .find({
-        active: true,
+        active: typeof query.active === 'boolean' ? query.active : true,
         $or: [
           { 'firstCompanion._id': currentUser._id },
           { 'secondCompanion._id': currentUser._id },
