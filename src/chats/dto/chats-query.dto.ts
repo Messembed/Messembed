@@ -1,5 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 import { transformJson } from '../../common/utils/transform-json.util';
 
@@ -25,9 +31,13 @@ export class ChatsQueryDto {
   @IsOptional()
   externalMetadata?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ type: Boolean })
+  @ApiPropertyOptional({
+    type: Boolean,
+    default: false,
+    description: 'Set to true to get also chats with `active: false`',
+  })
   @Transform(transformJson)
   @IsBoolean()
   @IsOptional()
-  active?: boolean;
+  includeInactive?: boolean;
 }

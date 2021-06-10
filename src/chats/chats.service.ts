@@ -247,9 +247,12 @@ export class ChatsService {
       );
     }
 
+    if (!query.includeInactive) {
+      additionalFilters.active = true;
+    }
+
     let chats = await this.chatModel
       .find({
-        active: typeof query.active === 'boolean' ? query.active : true,
         $or: [
           { 'firstCompanion._id': currentUser._id },
           { 'secondCompanion._id': currentUser._id },
