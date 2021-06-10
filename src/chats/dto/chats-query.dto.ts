@@ -24,4 +24,10 @@ export class ChatsQueryDto {
   @IsObject()
   @IsOptional()
   externalMetadata?: Record<string, unknown>;
+
+  @ApiPropertyOptional({ type: Boolean })
+  @Transform(transformJson)
+  @IsBoolean()
+  @IsOptional()
+  active?: boolean;
 }
