@@ -235,8 +235,61 @@ export class ChatsService {
       );
 
       const matchingChatIds = _.keys(chatToLatestMessageMappingForOverwriting);
+
+      const companionNameMatches = await this.chatModel
+        .find(
+          {
+            $or: [
+              {
+                'firstCompanion._id': currentUser._id,
+                $or: [
+                  {
+                    'secondCompanion.externalMetadata.lastName': {
+                      $regex: query,
+                    },
+                  },
+                  {
+                    'secondCompanion.externalMetadata.firstName': {
+                      $regex: query,
+                    },
+                  },
+                  {
+                    'secondCompanion.externalMetadata.secondName': {
+                      $regex: query,
+                    },
+                  },
+                ],
+              },
+              {
+                'secondCompanion._id': currentUser._id,
+                $or: [
+                  {
+                    'firstCompanion.externalMetadata.lastName': {
+                      $regex: query,
+                    },
+                  },
+                  {
+                    'firstCompanion.externalMetadata.firstName': {
+                      $regex: query,
+                    },
+                  },
+                  {
+                    'firstCompanion.externalMetadata.secondName': {
+                      $regex: query,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          ['_id'],
+        )
+        .exec();
+
       additionalFilters._id = {
-        $in: matchingChatIds.map(id => new Types.ObjectId(id)),
+        $in: matchingChatIds
+          .map(id => new Types.ObjectId(id))
+          .concat(companionNameMatches.map(id => id._id)),
       };
     } else if (
       currentUser.blockStatus === 'CANT_SEND_AND_RECEIVE_NEW_MESSAGES' &&
