@@ -1,4 +1,10 @@
-import { IsObject, IsOptional, IsMongoId, IsArray } from 'class-validator';
+import {
+  IsObject,
+  IsOptional,
+  IsMongoId,
+  IsArray,
+  IsString,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMessageAsAdminDto {
@@ -7,6 +13,7 @@ export class CreateMessageAsAdminDto {
   userId: string;
 
   @ApiProperty()
+  @IsString()
   content: string;
 
   @ApiPropertyOptional({ type: 'object', additionalProperties: true })
