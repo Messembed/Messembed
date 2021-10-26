@@ -48,7 +48,7 @@ export class PersonalChatDto {
           options && options.chatToLatestMessageMappingForOverwriting
             ? options.chatToLatestMessageMappingForOverwriting[
                 chat._id.toString()
-              ]
+              ] || chat.lastMessage
             : chat.lastMessage,
       }),
     );
