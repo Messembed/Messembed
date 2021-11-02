@@ -9,7 +9,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMessageAsAdminDto {
   @ApiProperty()
-  @IsMongoId()
+  @IsString()
   userId: string;
 
   @ApiProperty()
