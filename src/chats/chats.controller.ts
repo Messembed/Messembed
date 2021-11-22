@@ -21,6 +21,8 @@ import { UserDocument } from '../users/schemas/user.schema';
 import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { createValidationPipe } from '../common/utils/create-validation-pipe.util';
+import { UnreadChatsCountDto } from './dto/unread-chats-count.dto';
+import { GetUnreadChatsCountQueryDto } from './dto/get-unread-chats-count-query.dto';
 
 @Controller()
 @ApiTags('Chat')
@@ -46,6 +48,16 @@ export class ChatsController {
     @CurrentUser() currentUser: UserDocument,
   ): Promise<PersonalChatDto[]> {
     return this.chatsService.listPersonalChatsOfUser(currentUser, query);
+  }
+
+  @Get('user/unread-personal-chats-count')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: () => UnreadChatsCountDto })
+  async getPersonalChatsUnreadCount(
+    @Query() query: GetUnreadChatsCountQueryDto,
+    @CurrentUser() currentUser: UserDocument,
+  ): Promise<UnreadChatsCountDto> {
+    return this.chatsService.getUnreadPersonalChatsCount(currentUser, query);
   }
 
   @Get('user/personal-chats/:chatId')

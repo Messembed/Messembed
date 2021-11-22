@@ -16,6 +16,8 @@ import { CreatePersonalChatDto } from './dto/create-personal-chat.dto';
 import { UpdatesService } from '../updates/updates.service';
 import { APP_CONFIG_KEY, AppConfigType } from '../config/app.config';
 import { MessagesService } from '../messages/messages.service';
+import { GetUnreadChatsCountQueryDto } from './dto/get-unread-chats-count-query.dto';
+import { UnreadChatsCountDto } from './dto/unread-chats-count.dto';
 
 @Injectable()
 export class ChatsService {
@@ -506,5 +508,20 @@ export class ChatsService {
       },
       { $addToSet: { 'lastMessage.deletedFor': deletedFor } },
     );
+  }
+
+  async getUnreadPersonalChatsCount(
+    currentUser: UserDocument,
+    query?: GetUnreadChatsCountQueryDto,
+  ): Promise<UnreadChatsCountDto> {
+    const count = await this.chatModel.countDocuments({
+      $or: [
+        { 'firstCompanion._id': currentUser._id },
+        { 'secondCompanion._id': currentUser._id },
+      ],
+      active: query.includeInactive === true,
+    });
+
+    return new UnreadChatsCountDto({ count });
   }
 }
