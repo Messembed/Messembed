@@ -514,14 +514,18 @@ export class ChatsService {
     currentUser: UserDocument,
     query?: GetUnreadChatsCountQueryDto,
   ): Promise<UnreadChatsCountDto> {
-    const count = await this.chatModel.countDocuments({
-      $or: [
-        { 'firstCompanion._id': currentUser._id },
-        { 'secondCompanion._id': currentUser._id },
-      ],
+    const count1 = await this.chatModel.countDocuments({
+      'firstCompanion._id': currentUser._id,
+      notReadByFirstCompanionMessagesCount: { $gt: 0 },
       active: query.includeInactive === true,
     });
 
-    return new UnreadChatsCountDto({ count });
+    const count2 = await this.chatModel.countDocuments({
+      'secondCompanion._id': currentUser._id,
+      notReadBySecondCompanionMessagesCount: { $gt: 0 },
+      active: query.includeInactive === true,
+    });
+
+    return new UnreadChatsCountDto({ count: count1 + count2 });
   }
 }
