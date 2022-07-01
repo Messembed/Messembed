@@ -270,6 +270,8 @@ export class MessagesService {
       },
     );
 
+    this.updatesService.sendNewMessageToAdmin({ message, chat });
+
     await this.chatsService.incrementNotReadMessagesCountAndReadCompanionsMessages(
       chat._id,
       chat.firstCompanion._id === params.userId ? 1 : 2,

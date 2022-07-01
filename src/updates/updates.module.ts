@@ -9,11 +9,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthConfigType, AUTH_CONFIG_KEY } from '../config/auth.config';
 import { UpdatesGateway } from './updates.gateway';
 import { MessagesModule } from '../messages/messages.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     forwardRef(() => ChatsModule),
     forwardRef(() => UsersModule),
+    forwardRef(() => AuthModule),
     forwardRef(() => MessagesModule),
     MongooseModule.forFeature([
       { name: UpdateModel.name, schema: UpdateSchema },

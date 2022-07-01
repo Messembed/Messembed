@@ -7,6 +7,8 @@ import { UpdateDto } from './dto/update.dto';
 import { UpdateModel, UpdateDocument } from './schemas/update.schema';
 import { UpdatesGateway } from './updates.gateway';
 import { UserDocument } from '../users/schemas/user.schema';
+import { MessageDocument } from '../messages/schemas/message.schema';
+import { ChatDocument } from '../chats/schemas/chat.schema';
 
 interface CreateUpdateOptions {
   /**
@@ -86,5 +88,12 @@ export class UpdatesService {
     }
 
     return update;
+  }
+
+  public sendNewMessageToAdmin(params: {
+    message: MessageDocument;
+    chat: ChatDocument;
+  }): void {
+    this.updatesGateway.sendNewMessageToAdmin(params);
   }
 }
