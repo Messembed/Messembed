@@ -119,7 +119,7 @@ export class UpdatesGateway
     };
 
     this.connectedSocketsOfAdmin.forEach(socket => {
-      socket.emit('new_message', data);
+      socket.emit('admin__new_message', data);
     });
   }
 
