@@ -81,6 +81,10 @@ export class UpdatesGateway
     } else {
       const user = socket.request.user as UserDocument;
 
+      if (!user) {
+        return;
+      }
+
       if (this.connectedSockets[user._id]) {
         _.pull(this.connectedSockets[user._id], socket);
       }
